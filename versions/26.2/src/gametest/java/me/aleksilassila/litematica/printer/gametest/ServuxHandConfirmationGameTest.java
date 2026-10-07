@@ -11,6 +11,7 @@ import fi.dy.masa.litematica.selection.Box;
 import fi.dy.masa.litematica.selection.SelectionMode;
 import fi.dy.masa.malilib.util.LayerMode;
 import me.aleksilassila.litematica.printer.config.Configs;
+import me.aleksilassila.litematica.printer.core.status.PrinterStatus;
 import me.aleksilassila.litematica.printer.enums.FillBlockModeType;
 import me.aleksilassila.litematica.printer.enums.FillModeFacingType;
 import me.aleksilassila.litematica.printer.enums.SelectionType;
@@ -78,6 +79,8 @@ public final class ServuxHandConfirmationGameTest implements FabricClientGameTes
                 configurePrinter();
             });
 
+            context.waitFor(client -> ModuleManager.getPrinterStatus()
+                    == PrinterStatus.WAITING_FOR_SERVUX_HAND, 200);
             context.waitFor(client ->
                     exactDroppedPackets()
                             == CARRIED_PACKET_DROPS, 200);

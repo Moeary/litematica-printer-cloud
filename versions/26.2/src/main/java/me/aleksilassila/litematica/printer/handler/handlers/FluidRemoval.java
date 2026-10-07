@@ -119,8 +119,8 @@ public class FluidRemoval extends Module {
             InventoryUtils.ItemSwitchResult switchResult =
                     InventoryUtils.switchToItemsResult(player, fillItems.toArray(new Item[0]));
             if (switchResult != InventoryUtils.ItemSwitchResult.READY) {
-                if (switchResult == InventoryUtils.ItemSwitchResult.WAITING) {
-                    enterWaiting(blockPos);
+                if (switchResult.isWaiting()) {
+                    enterWaiting(blockPos, switchResult.waitingReason());
                     skipIteration.set(true);
                     return;
                 }

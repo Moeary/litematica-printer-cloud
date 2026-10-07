@@ -7,6 +7,7 @@ import jdk.jfr.Configuration;
 import jdk.jfr.Recording;
 import jdk.jfr.RecordingState;
 import me.aleksilassila.litematica.printer.config.Configs;
+import me.aleksilassila.litematica.printer.core.status.PrinterStatus;
 import me.aleksilassila.litematica.printer.enums.RadiusShapeType;
 import me.aleksilassila.litematica.printer.enums.SelectionType;
 import me.aleksilassila.litematica.printer.handler.AsyncSearchCoordinator;
@@ -27,6 +28,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @SuppressWarnings("UnstableApiUsage")
 public final class FullPrintPerformanceGameTest implements FabricClientGameTest {
@@ -87,10 +89,16 @@ public final class FullPrintPerformanceGameTest implements FabricClientGameTest 
 
             context.runOnClient(client ->
                     Configs.Core.WORK_SWITCH.setBooleanValue(true));
+            AtomicBoolean sawItemSwitchWait = new AtomicBoolean();
             try {
-                context.waitFor(client ->
-                        FullPrintProfileMetrics.serverPlacementSuccesses()
-                                >= TARGETS.size(), 1200);
+                context.waitFor(client -> {
+                    PrinterStatus status = ModuleManager.getPrinterStatus();
+                    if (status == PrinterStatus.WAITING_FOR_SERVUX_HAND) {
+                        throw new AssertionError("Servux wait shown while hand confirmation is disabled");
+                    }
+                    if (status == PrinterStatus.WAITING_FOR_HAND) sawItemSwitchWait.set(true);
+                    return FullPrintProfileMetrics.serverPlacementSuccesses() >= TARGETS.size();
+                }, 1200);
             } catch (RuntimeException | Error failure) {
                 FullPrintProfileMetrics.Snapshot partialMetrics =
                         FullPrintProfileMetrics.snapshot();
@@ -140,6 +148,9 @@ public final class FullPrintPerformanceGameTest implements FabricClientGameTest 
             WorldResult clientResult = context.computeOnClient(client ->
                     inspectWorld(client.level, client.player.getInventory()));
             assertCompleted(serverResult, clientResult, metrics);
+            if (!sawItemSwitchWait.get()) {
+                throw new AssertionError("Mixed-material print did not exercise the ordinary switch HUD status");
+            }
 
             ScanTotals scanTotals = ScanTotals.from(rounds);
             printResult(startedNanos, allPlacedNanos, completedNanos,

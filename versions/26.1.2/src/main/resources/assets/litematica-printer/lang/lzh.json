@@ -241,6 +241,7 @@
   "litematica-printer.hud.status.searching": "索役中",
   "litematica-printer.hud.status.waitingForSearch": "候再索",
   "litematica-printer.hud.status.waitingForHand": "候易手物",
+  "litematica-printer.hud.status.waitingForServuxHand": "候 Servux 易手核驗",
   "litematica-printer.hud.status.waitingForShulker": "候界伏盒取物",
   "litematica-printer.hud.status.waitingForContainer": "候器闔",
   "litematica-printer.hud.status.waitingForLook": "候調視",

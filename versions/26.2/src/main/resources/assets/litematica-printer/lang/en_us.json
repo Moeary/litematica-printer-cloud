@@ -241,6 +241,7 @@
   "litematica-printer.hud.status.searching": "Searching for jobs",
   "litematica-printer.hud.status.waitingForSearch": "Waiting for the next search",
   "litematica-printer.hud.status.waitingForHand": "Waiting for hand switch",
+  "litematica-printer.hud.status.waitingForServuxHand": "Waiting for Servux hand confirmation",
   "litematica-printer.hud.status.waitingForShulker": "Waiting for shulker box",
   "litematica-printer.hud.status.waitingForContainer": "Waiting for container to close",
   "litematica-printer.hud.status.waitingForLook": "Waiting for view adjustment",

@@ -241,6 +241,7 @@
   "litematica-printer.hud.status.searching": "Поиск заданий",
   "litematica-printer.hud.status.waitingForSearch": "Ожидание следующего поиска",
   "litematica-printer.hud.status.waitingForHand": "Ожидание смены предмета",
+  "litematica-printer.hud.status.waitingForServuxHand": "Ожидание подтверждения Servux",
   "litematica-printer.hud.status.waitingForShulker": "Ожидание шалкерового ящика",
   "litematica-printer.hud.status.waitingForContainer": "Ожидание закрытия контейнера",
   "litematica-printer.hud.status.waitingForLook": "Ожидание поворота камеры",

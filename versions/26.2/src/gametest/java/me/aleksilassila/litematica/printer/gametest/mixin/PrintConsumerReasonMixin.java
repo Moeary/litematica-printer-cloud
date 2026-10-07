@@ -36,7 +36,7 @@ public abstract class PrintConsumerReasonMixin {
             LocalPlayer player, Item[] items) {
         InventoryUtils.ItemSwitchResult result =
                 InventoryUtils.switchToItemsResult(player, items);
-        if (result == InventoryUtils.ItemSwitchResult.WAITING) {
+        if (result.isWaiting()) {
             FullPrintProfileMetrics.recordItemSwitchWaiting();
         } else if (result == InventoryUtils.ItemSwitchResult.UNAVAILABLE) {
             FullPrintProfileMetrics.recordItemUnavailable();

@@ -220,6 +220,7 @@
   "litematica-printer.hud.status.searching": "正在搜尋作業",
   "litematica-printer.hud.status.waitingForSearch": "等待下一輪搜尋",
   "litematica-printer.hud.status.waitingForHand": "等待切換手持物品",
+  "litematica-printer.hud.status.waitingForServuxHand": "等待 Servux 換手確認",
   "litematica-printer.hud.status.waitingForShulker": "等待界伏盒取物",
   "litematica-printer.hud.status.waitingForContainer": "等待容器關閉",
   "litematica-printer.hud.status.waitingForLook": "等待視角調整",

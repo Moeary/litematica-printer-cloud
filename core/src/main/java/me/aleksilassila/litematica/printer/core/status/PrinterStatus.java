@@ -12,6 +12,7 @@ public enum PrinterStatus {
     SEARCHING("litematica-printer.hud.status.searching", Kind.SEARCH),
     WAITING_FOR_SEARCH("litematica-printer.hud.status.waitingForSearch", Kind.SEARCH),
     WAITING_FOR_HAND("litematica-printer.hud.status.waitingForHand", Kind.WAITING),
+    WAITING_FOR_SERVUX_HAND("litematica-printer.hud.status.waitingForServuxHand", Kind.WAITING),
     WAITING_FOR_SHULKER("litematica-printer.hud.status.waitingForShulker", Kind.WAITING),
     WAITING_FOR_CONTAINER("litematica-printer.hud.status.waitingForContainer", Kind.WAITING),
     WAITING_FOR_LOOK("litematica-printer.hud.status.waitingForLook", Kind.WAITING),
