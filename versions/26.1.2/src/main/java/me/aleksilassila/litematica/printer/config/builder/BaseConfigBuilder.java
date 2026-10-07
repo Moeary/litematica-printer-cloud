@@ -41,6 +41,7 @@ public abstract class BaseConfigBuilder<T extends ConfigBase<?>, B extends BaseC
         return (B) this;
     }
 
+    /** An empty key explicitly disables the hover description. */
     public B setDescKey(String comment) {
         this.descKey = comment;
         return (B) this;

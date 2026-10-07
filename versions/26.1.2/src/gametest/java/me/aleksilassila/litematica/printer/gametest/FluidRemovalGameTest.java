@@ -99,6 +99,13 @@ public final class FluidRemovalGameTest implements FabricClientGameTest {
 
     /** Exercise actual config loading, dropdown cycling, and unchanged height filtering. */
     private static void verifyAreaSelectionOptions(net.minecraft.client.player.LocalPlayer player) {
+        if (Configs.Fill.FILL_SELECTION_TYPE.getComment() != null
+                || Configs.Fluid.FLUID_SELECTION_TYPE.getComment() != null) {
+            throw new AssertionError("Area-selection scope must not create a hover tooltip");
+        }
+        if (Configs.Print.PRINT_SELECTION_TYPE.getComment() == null) {
+            throw new AssertionError("Unrelated printing descriptions must remain available");
+        }
         AreaSelectionType[] options = AreaSelectionType.values();
         if (options.length != 3 || options[2].cycle(true) != AreaSelectionType.ALL
                 || AreaSelectionType.ALL.cycle(false) != AreaSelectionType.ABOVE_PLAYER) {

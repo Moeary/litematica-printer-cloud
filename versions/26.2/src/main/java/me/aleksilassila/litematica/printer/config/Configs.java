@@ -390,6 +390,7 @@ public class Configs extends ConfigBuilders implements IConfigHandler {
         // 选区类型
         public static final ConfigOptionList FILL_SELECTION_TYPE = optionList("fillSelectionType")
                 .defaultValue(AreaSelectionType.ALL)
+                .setDescKey("")
                 .build();
 
         // 填充方块模式
@@ -432,6 +433,7 @@ public class Configs extends ConfigBuilders implements IConfigHandler {
         // 选区类型
         public static final ConfigOptionList FLUID_SELECTION_TYPE = optionList("fluidSelectionType")
                 .defaultValue(AreaSelectionType.ALL)
+                .setDescKey("")
                 .build();
 
         // 填充流动液体
