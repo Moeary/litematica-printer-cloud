@@ -6,6 +6,8 @@ import fi.dy.masa.malilib.util.position.LayerRange;
 import me.aleksilassila.litematica.printer.config.Configs;
 import me.aleksilassila.litematica.printer.enums.IterationOrderType;
 import me.aleksilassila.litematica.printer.enums.SelectionType;
+import me.aleksilassila.litematica.printer.enums.AreaSelectionType;
+import me.aleksilassila.litematica.printer.core.spatial.PlayerHeightFilter;
 import me.aleksilassila.litematica.printer.printer.PrinterBox;
 import me.aleksilassila.litematica.printer.utils.ConfigUtils;
 import net.minecraft.client.player.LocalPlayer;
@@ -34,7 +36,7 @@ public class IteratorManager {
     @Nullable
     private LayerMode lastLayerMode = null;
     @Nullable
-    private SelectionType lastSelectionType = null;
+    private PlayerHeightFilter lastHeightFilter = null;
     @Nullable
     private PrinterBox lastBox;
 
@@ -65,7 +67,11 @@ public class IteratorManager {
         int layerAbove = layerRange.getLayerAbove();
         int layerBelow = layerRange.getLayerBelow();
 
-        SelectionType selectionType = selectionTypeObj instanceof SelectionType s ? s : null;
+        PlayerHeightFilter heightFilter = switch (selectionTypeObj) {
+            case SelectionType type -> type.heightFilter();
+            case AreaSelectionType type -> type.heightFilter();
+            case null, default -> PlayerHeightFilter.ALL;
+        };
 
         boolean needRebuild = this.needsRebuild
                 || this.box == null
@@ -80,7 +86,7 @@ public class IteratorManager {
                 || layerBelow != lastLayerBelow
                 || layerAxis != lastLayerAxis
                 || layerMode != lastLayerMode
-                || selectionType != lastSelectionType;
+                || heightFilter != lastHeightFilter;
 
         if (needRebuild) {
             lastEyePos = eyeBP;
@@ -92,7 +98,7 @@ public class IteratorManager {
             lastLayerBelow = layerBelow;
             lastLayerAxis = layerAxis;
             lastLayerMode = layerMode;
-            lastSelectionType = selectionType;
+            lastHeightFilter = heightFilter;
 
             int discreteExtent = Math.max(0, (int) Math.floor(effectiveRange));
             int minX = eyeBP.getX() - discreteExtent;
@@ -136,12 +142,10 @@ public class IteratorManager {
                 }
             }
 
-            if (selectionType != null) {
-                if (selectionType == SelectionType.LITEMATICA_SELECTION_BELOW_PLAYER) {
-                    maxY = Math.min(maxY, (int) Math.floor(player.getY()));
-                } else if (selectionType == SelectionType.LITEMATICA_SELECTION_ABOVE_PLAYER) {
-                    minY = Math.max(minY, (int) Math.ceil(player.getY()));
-                }
+            switch (heightFilter) {
+                case BELOW_PLAYER -> maxY = Math.min(maxY, (int) Math.floor(player.getY()));
+                case ABOVE_PLAYER -> minY = Math.max(minY, (int) Math.ceil(player.getY()));
+                case ALL -> { }
             }
 
             box = new PrinterBox(minX, minY, minZ, maxX, maxY, maxZ);

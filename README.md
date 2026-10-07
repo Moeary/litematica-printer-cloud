@@ -84,8 +84,10 @@ In a fresh Minecraft 26.2 A/B benchmark using the same 531,441-position fixture,
 
 - **Print:** place missing blocks, adjust supported block states, and optionally break wrong or extra blocks.
 - **Fill:** fill the active Litematica selection using configurable block and direction filters.
-- **Fluid removal:** remove configured still or flowing fluids inside the selected work area.
+- **Fluid removal:** remove configured still or flowing fluids inside the active Litematica area selection.
 - **Bedrock breaking:** discover bedrock jobs and submit them to a supported bedrock-mining mod.
+
+Fill and fluid removal use an area-selection scope control, separate from schematic printing: the entire selection, below the player, or above the player. Work radius and Litematica's global render-layer range always apply; neither mode requires a loaded schematic.
 
 The legacy general-purpose mining mode and the built-in remote warehouse were removed.
 

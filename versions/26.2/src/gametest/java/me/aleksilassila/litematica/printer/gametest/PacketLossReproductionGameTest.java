@@ -16,6 +16,7 @@ import me.aleksilassila.litematica.printer.config.Configs;
 import me.aleksilassila.litematica.printer.enums.FillBlockModeType;
 import me.aleksilassila.litematica.printer.enums.FillModeFacingType;
 import me.aleksilassila.litematica.printer.enums.SelectionType;
+import me.aleksilassila.litematica.printer.enums.AreaSelectionType;
 import me.aleksilassila.litematica.printer.enums.ShulkerSource;
 import me.aleksilassila.litematica.printer.handler.ModuleManager;
 import me.aleksilassila.litematica.printer.mixin.printer.litematica.InventoryUtilsAccessor;
@@ -674,7 +675,7 @@ public final class PacketLossReproductionGameTest implements FabricClientGameTes
         Configs.Print.ENABLED.setBooleanValue(false);
         Configs.Fluid.ENABLED.setBooleanValue(false);
         Configs.Bedrock.ENABLED.setBooleanValue(false);
-        Configs.Fill.FILL_SELECTION_TYPE.setOptionListValue(SelectionType.LITEMATICA_SELECTION);
+        Configs.Fill.FILL_SELECTION_TYPE.setOptionListValue(AreaSelectionType.ALL);
         Configs.Fill.FILL_BLOCK_MODE.setOptionListValue(FillBlockModeType.BLOCKLIST);
         Configs.Fill.FILL_BLOCK_LIST.setStrings(List.of("minecraft:stone"));
         Configs.Fill.FILL_BLOCK_FACING.setOptionListValue(FillModeFacingType.DOWN);

@@ -5,7 +5,9 @@ import fi.dy.masa.litematica.selection.AreaSelection;
 import fi.dy.masa.litematica.selection.Box;
 import fi.dy.masa.litematica.selection.SelectionMode;
 import me.aleksilassila.litematica.printer.config.Configs;
+import me.aleksilassila.litematica.printer.enums.AreaSelectionType;
 import me.aleksilassila.litematica.printer.enums.SelectionType;
+import me.aleksilassila.litematica.printer.handler.IteratorManager;
 import me.aleksilassila.litematica.printer.handler.ModuleManager;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
@@ -48,7 +50,10 @@ public final class FluidRemovalGameTest implements FabricClientGameTest {
                     && client.player.getInventory().getItem(9).is(Items.SAND)
                     && client.player.getInventory().getItem(9).getCount() == MATERIAL_COUNT);
 
-            context.runOnClient(client -> configureFluidRemoval());
+            context.runOnClient(client -> {
+                verifyAreaSelectionOptions(client.player);
+                configureFluidRemoval();
+            });
             context.waitFor(client -> client.level != null
                     && client.level.getBlockState(FLUID_TARGET).is(Blocks.SAND)
                     && client.level.getFluidState(FLUID_TARGET).isEmpty());
@@ -99,6 +104,48 @@ public final class FluidRemovalGameTest implements FabricClientGameTest {
         });
     }
 
+    /** Exercise actual config loading, dropdown cycling, and unchanged height filtering. */
+    private static void verifyAreaSelectionOptions(net.minecraft.client.player.LocalPlayer player) {
+        AreaSelectionType[] options = AreaSelectionType.values();
+        if (options.length != 3 || options[2].cycle(true) != AreaSelectionType.ALL
+                || AreaSelectionType.ALL.cycle(false) != AreaSelectionType.ABOVE_PLAYER) {
+            throw new AssertionError("Area-selection dropdown must contain only its three scope choices");
+        }
+        for (var config : List.of(Configs.Fill.FILL_SELECTION_TYPE, Configs.Fluid.FLUID_SELECTION_TYPE)) {
+            var originalValue = config.getOptionListValue();
+            try {
+                if (config.getDefaultOptionListValue() != AreaSelectionType.ALL) {
+                    throw new AssertionError("Area-selection config still uses printing options");
+                }
+                for (SelectionType legacy : SelectionType.values()) {
+                    AreaSelectionType expected = switch (legacy) {
+                        case LITEMATICA_SELECTION_BELOW_PLAYER -> AreaSelectionType.BELOW_PLAYER;
+                        case LITEMATICA_SELECTION_ABOVE_PLAYER -> AreaSelectionType.ABOVE_PLAYER;
+                        default -> AreaSelectionType.ALL;
+                    };
+                    config.setValueFromString(legacy.getStringValue());
+                    if (config.getOptionListValue() != expected) {
+                        throw new AssertionError("Lost old area-selection setting: " + legacy);
+                    }
+                    String saved = config.getStringValue();
+                    config.setValueFromString(saved);
+                    if (config.getOptionListValue() != expected) {
+                        throw new AssertionError("Area-selection setting did not round-trip: " + saved);
+                    }
+                    IteratorManager oldRange = new IteratorManager();
+                    IteratorManager newRange = new IteratorManager();
+                    oldRange.tryBuildBox(player, legacy);
+                    newRange.tryBuildBox(player, expected);
+                    if (!oldRange.getBox().equals(newRange.getBox())) {
+                        throw new AssertionError("Area-selection migration changed the scan range: " + legacy);
+                    }
+                }
+            } finally {
+                config.setOptionListValue(originalValue);
+            }
+        }
+    }
+
     private static void configureFluidRemoval() {
         var selectionManager = DataManager.getSelectionManager();
         if (selectionManager.getSelectionMode() != SelectionMode.SIMPLE) {
@@ -125,7 +172,7 @@ public final class FluidRemovalGameTest implements FabricClientGameTest {
         Configs.Print.ENABLED.setBooleanValue(false);
         Configs.Fill.ENABLED.setBooleanValue(false);
         Configs.Bedrock.ENABLED.setBooleanValue(false);
-        Configs.Fluid.FLUID_SELECTION_TYPE.setOptionListValue(SelectionType.LITEMATICA_SELECTION);
+        Configs.Fluid.FLUID_SELECTION_TYPE.setOptionListValue(AreaSelectionType.ALL);
         Configs.Fluid.FILL_FLOWING_FLUID.setBooleanValue(true);
         Configs.Fluid.FLUID_REPLACE_BLOCK_LIST.setStrings(List.of("minecraft:sand"));
         Configs.Fluid.FLUID_LIST.setStrings(List.of("minecraft:water"));
