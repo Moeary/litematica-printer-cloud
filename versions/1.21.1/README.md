@@ -10,7 +10,7 @@
 .\gradlew.bat :1.21.1:remapJar :core:test --max-workers=2
 ```
 
-正式产物：`versions/1.21.1/build/libs/litematica-printer-1.1.0-backport.2+1.21.1.jar`。不要把开发 JAR 或下述测试 JAR 安装到日常游戏实例。
+正式产物：`versions/1.21.1/build/libs/litematica-printer-1.1.2+1.21.1.jar`。不要把开发 JAR 或下述测试 JAR 安装到日常游戏实例。
 
 ChainVeinFabric 为可选运行依赖；1.21.1 目标缓存反射调用 `queueMineJobs(Minecraft, Collection<BlockPos>)`，不需要其 JAR 才能编译，也不将它打包进 Printer。QuickShulker 直接传输接口同样保持为可选反射边界。
 
@@ -40,4 +40,6 @@ ChainVeinFabric 为可选运行依赖；1.21.1 目标缓存反射调用 `queueMi
 
 ## 2026-10-13 维护补丁
 
-`1.1.0-backport.2` 回迁上游 `184b19fd`：超时或部分归还后保留归还请求，重新读取同步库存，并轮换被阻塞的候选项。正式 JAR 构建与 5 项核心测试通过；本轮未重复完整共装矩阵或实服丢包验证。详见 [发布说明](../../.github/release-notes/mc1.21.1-1.1.0-backport.2.md)。
+`1.1.2` 回迁上游 `184b19fd`：超时或部分归还后保留归还请求，重新读取同步库存，并轮换被阻塞的候选项。正式 JAR 构建与 5 项核心测试通过；本轮未重复完整共装矩阵或实服丢包验证。详见 [发布说明](../../.github/release-notes/v1.1.2-mc1.21.1.md)。
+
+发布沿用 main 的共同 Release；版本分支标签仅追加本版本 JAR 和 `SHA256SUMS-mc1.21.1.txt`，不创建独立 Release。CI artifact 名只使用安全字符。

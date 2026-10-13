@@ -52,3 +52,6 @@ AGENTS.md
 *.factorypath
 *.bak
 *.tmp
+
+# Staged release artifacts.
+/dist/
