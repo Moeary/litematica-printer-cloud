@@ -10,7 +10,7 @@
 .\gradlew.bat :1.21.1:remapJar :core:test --max-workers=2
 ```
 
-正式产物：`versions/1.21.1/build/libs/litematica-printer-1.1.0-backport.1+1.21.1.jar`。不要把开发 JAR 或下述测试 JAR 安装到日常游戏实例。
+正式产物：`versions/1.21.1/build/libs/litematica-printer-1.1.0-backport.2+1.21.1.jar`。不要把开发 JAR 或下述测试 JAR 安装到日常游戏实例。
 
 ChainVeinFabric 为可选运行依赖；1.21.1 目标缓存反射调用 `queueMineJobs(Minecraft, Collection<BlockPos>)`，不需要其 JAR 才能编译，也不将它打包进 Printer。QuickShulker 直接传输接口同样保持为可选反射边界。
 
@@ -37,3 +37,7 @@ ChainVeinFabric 为可选运行依赖；1.21.1 目标缓存反射调用 `queueMi
 ## 覆盖边界
 
 本轮未验证破基岩漏洞在不同服务端实现中的行为、Servux 服务端实体查询往返、旧版 QuickShulker/TakeItOut/BedrockMiner 的完整联动、长时间压力测试以及真实远程服务器延迟/丢包。NetworkChaosFabric 已共装，但此轮打印场景没有主动注入网络故障。这些功能源码保留，不能由上述通过结果推断其所有运行条件均已覆盖。
+
+## 2026-10-13 维护补丁
+
+`1.1.0-backport.2` 回迁上游 `184b19fd`：超时或部分归还后保留归还请求，重新读取同步库存，并轮换被阻塞的候选项。正式 JAR 构建与 5 项核心测试通过；本轮未重复完整共装矩阵或实服丢包验证。详见 [发布说明](../../.github/release-notes/mc1.21.1-1.1.0-backport.2.md)。
