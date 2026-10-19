@@ -5,8 +5,6 @@ import fi.dy.masa.malilib.util.LayerMode;
 import fi.dy.masa.malilib.util.position.LayerRange;
 import me.aleksilassila.litematica.printer.config.Configs;
 import me.aleksilassila.litematica.printer.enums.IterationOrderType;
-import me.aleksilassila.litematica.printer.enums.SelectionType;
-import me.aleksilassila.litematica.printer.enums.AreaSelectionType;
 import me.aleksilassila.litematica.printer.core.spatial.PlayerHeightFilter;
 import me.aleksilassila.litematica.printer.printer.PrinterBox;
 import me.aleksilassila.litematica.printer.utils.ConfigUtils;
@@ -15,6 +13,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Objects;
 
 /**
  * 搜索范围管理器。
@@ -49,7 +49,8 @@ public class IteratorManager {
     /**
      * 根据玩家位置和配置重建 PrinterBox，返回是否需要重置扫描状态。
      */
-    public boolean tryBuildBox(LocalPlayer player, @Nullable Object selectionTypeObj) {
+    public boolean tryBuildBox(LocalPlayer player, PlayerHeightFilter heightFilter) {
+        Objects.requireNonNull(heightFilter, "heightFilter");
         BlockPos eyeBP = new BlockPos(
                 (int) Math.round(player.getX()),
                 (int) Math.round(player.getEyeY()),
@@ -66,12 +67,6 @@ public class IteratorManager {
         int layerSingle = layerRange.getLayerSingle();
         int layerAbove = layerRange.getLayerAbove();
         int layerBelow = layerRange.getLayerBelow();
-
-        PlayerHeightFilter heightFilter = switch (selectionTypeObj) {
-            case SelectionType type -> type.heightFilter();
-            case AreaSelectionType type -> type.heightFilter();
-            case null, default -> PlayerHeightFilter.ALL;
-        };
 
         boolean needRebuild = this.needsRebuild
                 || this.box == null

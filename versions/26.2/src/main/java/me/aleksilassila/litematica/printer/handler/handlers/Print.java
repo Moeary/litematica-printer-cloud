@@ -9,6 +9,7 @@ import me.aleksilassila.litematica.printer.config.Configs;
 import me.aleksilassila.litematica.printer.core.status.PrinterWaitReason;
 import me.aleksilassila.litematica.printer.enums.BlockMatchingType;
 import me.aleksilassila.litematica.printer.enums.HighlightType;
+import me.aleksilassila.litematica.printer.enums.SelectionType;
 import me.aleksilassila.litematica.printer.handler.AsyncSearchCoordinator;
 import me.aleksilassila.litematica.printer.handler.Module;
 import me.aleksilassila.litematica.printer.handler.TransactionKey;
@@ -56,7 +57,9 @@ public class Print extends Module {
     private boolean lastSkipResult = false;
 
     public Print() {
-        super(NAME, Configs.Print.ENABLED, Configs.Print.PRINT_SELECTION_TYPE, true);
+        super(NAME, Configs.Print.ENABLED,
+                () -> ((SelectionType) Configs.Print.PRINT_SELECTION_TYPE.getOptionListValue()).heightFilter(),
+                true);
         this.guide = new PlacementGuide(client);
         this.needSchematic = true;
     }

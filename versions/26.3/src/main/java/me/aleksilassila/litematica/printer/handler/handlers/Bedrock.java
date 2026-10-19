@@ -3,6 +3,7 @@ package me.aleksilassila.litematica.printer.handler.handlers;
 import me.aleksilassila.litematica.printer.I18n;
 import me.aleksilassila.litematica.printer.utils.ModUtils;
 import me.aleksilassila.litematica.printer.config.Configs;
+import me.aleksilassila.litematica.printer.core.spatial.PlayerHeightFilter;
 import me.aleksilassila.litematica.printer.enums.HighlightType;
 import me.aleksilassila.litematica.printer.handler.AsyncSearchCoordinator;
 import me.aleksilassila.litematica.printer.handler.Module;
@@ -18,7 +19,7 @@ public class Bedrock extends Module {
     public final static String NAME = "bedrock";
 
     public Bedrock() {
-        super(NAME, Configs.Bedrock.ENABLED, null, true);
+        super(NAME, Configs.Bedrock.ENABLED, () -> PlayerHeightFilter.ALL, true);
     }
 
     @Override

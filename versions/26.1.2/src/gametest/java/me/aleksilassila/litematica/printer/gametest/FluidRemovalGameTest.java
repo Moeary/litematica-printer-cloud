@@ -5,6 +5,7 @@ import fi.dy.masa.litematica.selection.AreaSelection;
 import fi.dy.masa.litematica.selection.Box;
 import fi.dy.masa.litematica.selection.SelectionMode;
 import me.aleksilassila.litematica.printer.config.Configs;
+import me.aleksilassila.litematica.printer.core.spatial.PlayerHeightFilter;
 import me.aleksilassila.litematica.printer.enums.AreaSelectionType;
 import me.aleksilassila.litematica.printer.enums.SelectionType;
 import me.aleksilassila.litematica.printer.handler.IteratorManager;
@@ -99,6 +100,7 @@ public final class FluidRemovalGameTest implements FabricClientGameTest {
 
     /** Exercise actual config loading, dropdown cycling, and unchanged height filtering. */
     private static void verifyAreaSelectionOptions(net.minecraft.client.player.LocalPlayer player) {
+        verifyHeightFilterChanges(player);
         if (Configs.Fill.FILL_SELECTION_TYPE.getComment() != null
                 || Configs.Fluid.FLUID_SELECTION_TYPE.getComment() != null) {
             throw new AssertionError("Area-selection scope must not create a hover tooltip");
@@ -134,8 +136,8 @@ public final class FluidRemovalGameTest implements FabricClientGameTest {
                     }
                     IteratorManager oldRange = new IteratorManager();
                     IteratorManager newRange = new IteratorManager();
-                    oldRange.tryBuildBox(player, legacy);
-                    newRange.tryBuildBox(player, expected);
+                    oldRange.tryBuildBox(player, legacy.heightFilter());
+                    newRange.tryBuildBox(player, expected.heightFilter());
                     if (!oldRange.getBox().equals(newRange.getBox())) {
                         throw new AssertionError("Area-selection migration changed the scan range: " + legacy);
                     }
@@ -143,6 +145,36 @@ public final class FluidRemovalGameTest implements FabricClientGameTest {
             } finally {
                 config.setOptionListValue(originalValue);
             }
+        }
+    }
+
+    private static void verifyHeightFilterChanges(net.minecraft.client.player.LocalPlayer player) {
+        var layers = DataManager.getRenderLayerRange();
+        var originalMode = layers.getLayerMode();
+        try {
+            layers.setLayerMode(fi.dy.masa.malilib.util.LayerMode.ALL);
+            IteratorManager range = new IteratorManager();
+            range.tryBuildBox(player, PlayerHeightFilter.ALL);
+            var full = range.getBox();
+            if (range.tryBuildBox(player, PlayerHeightFilter.ALL)) {
+                throw new AssertionError("An unchanged height filter must reuse the scan range");
+            }
+            if (!range.tryBuildBox(player, PlayerHeightFilter.BELOW_PLAYER)
+                    || range.getBox().maxY != Math.min(full.maxY, (int) Math.floor(player.getY()))
+                    || range.getBox().minY != full.minY) {
+                throw new AssertionError("Below-player filtering did not rebuild the vertical range");
+            }
+            if (!range.tryBuildBox(player, PlayerHeightFilter.ABOVE_PLAYER)
+                    || range.getBox().minY != Math.max(full.minY, (int) Math.ceil(player.getY()))
+                    || range.getBox().maxY != full.maxY) {
+                throw new AssertionError("Above-player filtering did not rebuild the vertical range");
+            }
+            if (!range.tryBuildBox(player, PlayerHeightFilter.ALL)
+                    || !full.equals(range.getBox())) {
+                throw new AssertionError("Removing the height filter must restore the original scan range");
+            }
+        } finally {
+            layers.setLayerMode(originalMode);
         }
     }
 
