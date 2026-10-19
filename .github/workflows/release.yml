@@ -108,28 +108,7 @@ jobs:
           path: mod-jars/*.jar
           if-no-files-found: error
 
-      - name: Remove previous jar assets
-        uses: actions/github-script@v8
-        with:
-          script: |
-            const tag = context.ref.replace('refs/tags/', '');
-            try {
-              const { data: release } = await github.rest.repos.getReleaseByTag({
-                ...context.repo,
-                tag,
-              });
-              for (const asset of release.assets) {
-                if (asset.name.endsWith('.jar')) {
-                  await github.rest.repos.deleteReleaseAsset({
-                    ...context.repo,
-                    asset_id: asset.id,
-                  });
-                }
-              }
-            } catch (error) {
-              if (error.status !== 404) throw error;
-            }
-
+      # Upload replaces matching filenames and preserves other Minecraft versions.
       - name: Upload to Release
         uses: softprops/action-gh-release@v3
         with:
