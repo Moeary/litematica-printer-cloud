@@ -92,8 +92,9 @@ public class PlacementGuide {
                 if (!ctx.isSnapshot() && mc.gameMode == null) {
                     return null;
                 }
-                var downBlockState = ctx.getCurrentState(ctx.blockPos.below()).getBlock();
-                if (downBlockState != Blocks.COBWEB && downBlockState != Blocks.BAMBOO_SAPLING && !(downBlockState instanceof LiquidBlock)) {
+                var downBlockState = ctx.getCurrentState(ctx.blockPos.below());
+                // Match vanilla IceBlock.playerDestroy: ice needs support to leave water.
+                if (!downBlockState.blocksMotion() && !downBlockState.liquid()) {
                     return null;
                 }
                 if (!ctx.isSnapshot() && mc.gameMode.getPlayerMode().isCreative()) {

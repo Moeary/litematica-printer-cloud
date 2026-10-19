@@ -15,6 +15,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.FrontAndTop;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -122,8 +123,9 @@ public class PlacementGuide {
                 if (!ctx.isSnapshot() && mc.gameMode == null) {
                     return null;
                 }
-                var downBlockState = ctx.getCurrentState(ctx.blockPos.below()).getBlock();
-                if (downBlockState != Blocks.COBWEB && downBlockState != Blocks.BAMBOO_SAPLING && !(downBlockState instanceof LiquidBlock)) {
+                var downBlockState = ctx.getCurrentState(ctx.blockPos.below());
+                // Match vanilla IceBlock.playerDestroy: ice needs support to leave water.
+                if (!downBlockState.is(BlockTags.ICE_MELTS_WHEN_DESTROYED_ABOVE) && !downBlockState.liquid()) {
                     return null;
                 }
                 if (!ctx.isSnapshot() && mc.gameMode.getPlayerMode().isCreative()) {
