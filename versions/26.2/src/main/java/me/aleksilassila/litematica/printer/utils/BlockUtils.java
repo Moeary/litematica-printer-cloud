@@ -9,6 +9,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
@@ -138,11 +139,23 @@ public class BlockUtils {
     }
 
     /**
-     * 纯水源判断，不含 waterlogged 方块。
-     * 破冰放水只针对纯水源，含水方块走正常放置逻辑。
+     * Ordinary water-source block, excluding waterlogged blocks and bubble columns.
      */
     public static boolean isPureWaterSource(BlockState blockState) {
         return blockState.is(Blocks.WATER) && blockState.getValue(LiquidBlock.LEVEL) == 0;
+    }
+
+    /** Source water already present, including water held by another block. */
+    public static boolean isWaterSource(BlockState blockState) {
+        var fluid = blockState.getFluidState();
+        return fluid.is(FluidTags.WATER) && fluid.isSource();
+    }
+
+    /** A bubble column satisfies a plain water-source goal without removing its bubbles. */
+    public static boolean matchesWaterSourceRequest(BlockState required, BlockState current) {
+        return isPureWaterSource(required)
+                && (current.is(Blocks.WATER) || current.getBlock() instanceof BubbleColumnBlock)
+                && isWaterSource(current);
     }
 
     public static boolean isCorrectWaterLevel(BlockState requiredState, BlockState currentState) {

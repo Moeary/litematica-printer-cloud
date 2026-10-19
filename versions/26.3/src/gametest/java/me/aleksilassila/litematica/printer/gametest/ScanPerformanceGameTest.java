@@ -35,8 +35,9 @@ public final class ScanPerformanceGameTest implements FabricClientGameTest {
     private static final int EXPECTED_SEARCH_TILES = 4_817;
     private static final long MAX_SHARED_STATE_READS = 1_300_000L;
     private static final long EXPECTED_PRINT_JOBS = 65_229L;
-    private static final long EXPECTED_PRINT_JOB_XOR = 8_994_597_566_184_131_034L;
-    private static final long EXPECTED_PRINT_JOB_SUM = 7_194_905_270_522_797_690L;
+    // Only the ice job signature changed: ICE_WATER/ice -> CHAIN_BREAK/no item.
+    private static final long EXPECTED_PRINT_JOB_XOR = -6259407920410627970L;
+    private static final long EXPECTED_PRINT_JOB_SUM = 1101854948708837086L;
 
     @Override
     public void runTest(ClientGameTestContext context) {
@@ -250,9 +251,9 @@ public final class ScanPerformanceGameTest implements FabricClientGameTest {
                 || print.jobSum() != EXPECTED_PRINT_JOB_SUM) {
             throw new AssertionError("Printer job set changed: " + print);
         }
-        if (print.iceWaterJobs() != 1L) {
+        if (print.chainBreakJobs() < 1L) {
             throw new AssertionError(
-                    "Expected exactly one ice-to-water phase-two job: " + print);
+                    "Expected ChainVein break jobs, including ice-to-water: " + print);
         }
     }
 
@@ -293,7 +294,7 @@ public final class ScanPerformanceGameTest implements FabricClientGameTest {
                     + " jobs=" + request.jobCount()
                     + " jobXor=" + Long.toUnsignedString(request.jobXor())
                     + " jobSum=" + Long.toUnsignedString(request.jobSum())
-                    + " iceWaterJobs=" + request.iceWaterJobs());
+                    + " chainBreakJobs=" + request.chainBreakJobs());
         }
     }
 

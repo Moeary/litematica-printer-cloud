@@ -1701,15 +1701,15 @@ public final class AsyncSearchCoordinator {
             long jobCount = 0L;
             long jobXor = 0L;
             long jobSum = 0L;
-            long iceWaterJobs = 0L;
+            long chainBreakJobs = 0L;
             for (SearchTileResult result : work.results()) {
                 for (JobPool.Job<BlockPos, TransactionKey> job : result.jobs()) {
                     long fingerprint = fingerprint(job);
                     jobCount++;
                     jobXor ^= fingerprint;
                     jobSum += fingerprint;
-                    if (job.key().category() == TransactionKey.Category.ICE_WATER) {
-                        iceWaterJobs++;
+                    if (job.key().category() == TransactionKey.Category.CHAIN_BREAK) {
+                        chainBreakJobs++;
                     }
                 }
             }
@@ -1725,7 +1725,7 @@ public final class AsyncSearchCoordinator {
                     jobCount,
                     jobXor,
                     jobSum,
-                    iceWaterJobs);
+                    chainBreakJobs);
         }
 
         private static long fingerprint(JobPool.Job<BlockPos, TransactionKey> job) {
@@ -1776,6 +1776,6 @@ public final class AsyncSearchCoordinator {
             long jobCount,
             long jobXor,
             long jobSum,
-            long iceWaterJobs) {
+            long chainBreakJobs) {
     }
 }

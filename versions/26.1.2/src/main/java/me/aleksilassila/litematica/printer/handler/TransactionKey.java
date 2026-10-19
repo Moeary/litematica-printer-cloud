@@ -21,8 +21,6 @@ public record TransactionKey(Category category, @Nullable Item primaryItem) {
         /** Print 点击放置 */
         CLICK,
         /** Print 连锁破坏 */
-        CHAIN_BREAK,
-        /** Print 破冰等水 */
-        ICE_WATER
+        CHAIN_BREAK
     }
 }

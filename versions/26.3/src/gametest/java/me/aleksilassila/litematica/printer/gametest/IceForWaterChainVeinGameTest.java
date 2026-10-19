@@ -5,24 +5,35 @@ import fi.dy.masa.litematica.world.SchematicWorldHandler;
 import fi.dy.masa.malilib.util.LayerMode;
 import me.aleksilassila.litematica.printer.config.Configs;
 import me.aleksilassila.litematica.printer.core.status.PrinterWaitReason;
+import me.aleksilassila.litematica.printer.enums.BlockMatchingType;
 import me.aleksilassila.litematica.printer.enums.ScanState;
 import me.aleksilassila.litematica.printer.enums.SelectionType;
 import me.aleksilassila.litematica.printer.handler.ModuleManager;
 import me.aleksilassila.litematica.printer.interfaces.compat.ChainVeinCompat;
 import me.aleksilassila.litematica.printer.printer.ActionManager;
+import me.aleksilassila.litematica.printer.printer.PlacementGuide;
+import me.aleksilassila.litematica.printer.printer.SchematicBlockContext;
+import me.aleksilassila.litematica.printer.utils.BlockUtils;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.BubbleColumnBlock;
+import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-/** End-to-end coverage for Print's place-ice, ChainVein-break, wait-for-water transaction. */
+/** End-to-end coverage for world-state-driven ice placement and ChainVein consumption. */
 @SuppressWarnings("UnstableApiUsage")
 public final class IceForWaterChainVeinGameTest implements FabricClientGameTest {
     private static final String CHAINVEIN_PROPERTY =
@@ -38,12 +49,14 @@ public final class IceForWaterChainVeinGameTest implements FabricClientGameTest 
         for (Floor floor : Floor.values()) {
             runScenario(context, expectChainVein, floor);
         }
+        runBubbleColumn(context, expectChainVein, Blocks.SOUL_SAND);
+        runBubbleColumn(context, expectChainVein, Blocks.MAGMA_BLOCK);
     }
 
     private static void runScenario(
             ClientGameTestContext context, boolean expectChainVein, Floor floor) {
-        // Independent fixtures must not reuse the previous transaction coordinate.
-        BlockPos target = new BlockPos(2 + floor.ordinal(), 64, 0);
+        // Reuse the coordinate across worlds to catch leaked per-position state.
+        BlockPos target = new BlockPos(2, 64, 0);
         try (TestSingleplayerContext singleplayer = context.worldBuilder().create()) {
             prepareWorld(singleplayer, floor, target);
             singleplayer.getServer().runCommand("gamemode survival @p");
@@ -65,6 +78,7 @@ public final class IceForWaterChainVeinGameTest implements FabricClientGameTest 
                     throw new AssertionError("ChainVein availability does not match GameTest mode");
                 }
                 configurePrinter(target);
+                verifyWaterClassification(client, target);
             });
 
             if (floor == Floor.AIR) {
@@ -98,32 +112,174 @@ public final class IceForWaterChainVeinGameTest implements FabricClientGameTest 
                 return;
             }
 
-            AtomicBoolean observedWorldWait = new AtomicBoolean();
-            context.waitFor(client -> {
-                if (ModuleManager.PRINT.getScanState() == ScanState.WAITING
-                        && ModuleManager.PRINT.getWaitingReason()
-                        == PrinterWaitReason.WORLD_UPDATE) {
-                    observedWorldWait.set(true);
-                }
-                return client.level != null
-                        && client.level.getBlockState(target).is(Blocks.WATER);
-            }, 600);
-            context.waitFor(client -> ModuleManager.PRINT.getScanState() != ScanState.WAITING
-                    && ModuleManager.PRINT.getQueuedJobCount() == 0, 200);
-            context.waitTicks(5);
-
-            Result result = readResult(singleplayer, target);
-            if (!observedWorldWait.get()
-                    || !result.waterSource()
-                    || result.remainingIce() != ICE_COUNT - 1) {
-                throw new AssertionError("Ice-for-water ChainVein transaction failed: "
-                        + result + ", observedWorldWait=" + observedWorldWait.get());
-            }
-            System.out.println("[IceForWaterGameTest] PASS floor=" + floor + " with ChainVein: "
-                    + result + ", observedWorldWait=" + observedWorldWait.get());
+            // Pausing must not require clearing the producer/consumer to resume.
+            context.runOnClient(client -> Configs.Core.WORK_SWITCH.setBooleanValue(false));
+            context.waitTicks(3);
+            context.runOnClient(client -> Configs.Core.WORK_SWITCH.setBooleanValue(true));
+            assertWaterProduced(context, singleplayer, target, ICE_COUNT - 1);
+            context.waitFor(client -> !ModuleManager.PRINT.isOnCooldown(target), 200);
+            // Intentionally remove the completed water to request a second cycle.
+            // Repeated ice placement after this test mutation is expected, not a printer retry.
+            // Do not reset or reconfigure the producer between the two independent jobs.
+            singleplayer.getServer().runOnServer(server ->
+                    server.overworld().setBlockAndUpdate(target, Blocks.AIR.defaultBlockState()));
+            assertWaterProduced(context, singleplayer, target, ICE_COUNT - 2);
+            System.out.println("[IceForWaterGameTest] PASS floor=" + floor
+                    + " with ChainVein: same coordinate completed twice, no world wait");
         } finally {
             context.runOnClient(client -> cleanup(target));
         }
+    }
+
+    private static void verifyWaterClassification(Minecraft client, BlockPos target) {
+        var schematic = SchematicWorldHandler.getSchematicWorld();
+        var guide = new PlacementGuide(client);
+        int sourceStates = 0;
+        for (int level = 0; level <= 15; level++) {
+            BlockState water = Blocks.WATER.defaultBlockState().setValue(LiquidBlock.LEVEL, level);
+            boolean source = water.getFluidState().isSource();
+            boolean classifiedSource = BlockUtils.isPureWaterSource(water);
+            if (source != classifiedSource) {
+                throw new AssertionError("Water source classification differs from vanilla: " + water
+                        + ", source=" + source + ", classifiedSource=" + classifiedSource);
+            }
+            if (source) sourceStates++;
+            var action = guide.getAction(new SchematicBlockContext(
+                    client, client.level, schematic, target, water, Blocks.WATER.defaultBlockState()));
+            if (action != null) {
+                var items = action.getRequiredItems(Blocks.WATER);
+                if (items != null && Arrays.asList(items).contains(Items.ICE)) {
+                    throw new AssertionError("Existing water was incorrectly converted into an ice placement: " + water);
+                }
+            }
+        }
+        System.out.println("[IceForWaterGameTest] waterLevels=0..15, sourceStates="
+                + sourceStates + ": vanilla source classification agrees, no ice placement over existing water");
+        boolean replace = Configs.Print.PRINT_REPLACE.getBooleanValue();
+        var replaceList = List.copyOf(Configs.Print.REPLACEABLE_LIST.getStrings());
+        try {
+            Configs.Print.PRINT_REPLACE.setBooleanValue(true);
+            Configs.Print.REPLACEABLE_LIST.setStrings(List.of("minecraft:water", "minecraft:bubble_column"));
+            for (boolean drag : new boolean[]{false, true}) {
+                BlockState column = Blocks.BUBBLE_COLUMN.defaultBlockState()
+                        .setValue(BubbleColumnBlock.DRAG_DOWN, drag);
+                var columnContext = new SchematicBlockContext(
+                        client, client.level, schematic, target, column, Blocks.WATER.defaultBlockState());
+                if (!BlockUtils.isWaterSource(column)
+                        || BlockMatchingType.get(columnContext) != BlockMatchingType.CORRECT
+                        || guide.getAction(columnContext) != null) {
+                    throw new AssertionError("A source bubble column must satisfy a water-source request: " + column);
+                }
+                Configs.Print.PRINT_ICE_FOR_WATER.setBooleanValue(false);
+                if (BlockMatchingType.get(columnContext) == BlockMatchingType.CORRECT) {
+                    throw new AssertionError("Bubble-column equivalence must not change normal printing");
+                }
+                Configs.Print.PRINT_ICE_FOR_WATER.setBooleanValue(true);
+            }
+            BlockState slab = Blocks.OAK_SLAB.defaultBlockState()
+                    .setValue(BlockStateProperties.WATERLOGGED, true);
+            if (BlockUtils.matchesWaterSourceRequest(Blocks.WATER.defaultBlockState(), slab)) {
+                throw new AssertionError("Source equivalence must not hide a wrong solid block");
+            }
+        } finally {
+            Configs.Print.PRINT_REPLACE.setBooleanValue(replace);
+            Configs.Print.REPLACEABLE_LIST.setStrings(replaceList);
+        }
+    }
+
+    private static void assertWaterProduced(
+            ClientGameTestContext context, TestSingleplayerContext singleplayer,
+            BlockPos target, int expectedIce) {
+        context.waitFor(client -> {
+            assertNoWorldWait();
+            return BlockUtils.matchesWaterSourceRequest(
+                    Blocks.WATER.defaultBlockState(), client.level.getBlockState(target))
+                    && client.player.getInventory().countItem(Items.ICE) == expectedIce;
+        }, 600);
+        context.waitFor(client -> {
+            assertNoWorldWait();
+            return ModuleManager.PRINT.getQueuedJobCount() == 0;
+        }, 200);
+        context.waitTicks(5);
+        Result result = readResult(singleplayer, target);
+        if (!result.waterSource() || result.remainingIce() != expectedIce) {
+            throw new AssertionError("Ice-to-water consumption failed: " + result
+                    + ", expectedIce=" + expectedIce);
+        }
+    }
+
+    private static void assertNoWorldWait() {
+        if (ModuleManager.PRINT.getScanState() == ScanState.WAITING
+                && ModuleManager.PRINT.getWaitingReason() == PrinterWaitReason.WORLD_UPDATE) {
+            throw new AssertionError("Ice-to-water must not block the consumer waiting for water");
+        }
+    }
+
+    private static void runBubbleColumn(
+            ClientGameTestContext context, boolean expectChainVein, Block base) {
+        BlockPos target = new BlockPos(2, 64, 0);
+        try (TestSingleplayerContext singleplayer = context.worldBuilder().create()) {
+            prepareWorld(singleplayer, Floor.SOLID, target);
+            singleplayer.getServer().runOnServer(server -> {
+                // Contain the water so a long stability check cannot wash the
+                // survival-mode player off the small elevated test platform.
+                for (var direction : Direction.Plane.HORIZONTAL) {
+                    server.overworld().setBlockAndUpdate(target.relative(direction),
+                            Blocks.COBBLESTONE.defaultBlockState());
+                }
+                server.overworld().setBlockAndUpdate(target.below(), base.defaultBlockState());
+                server.overworld().setBlockAndUpdate(target, Blocks.WATER.defaultBlockState());
+            });
+            singleplayer.getServer().runCommand("gamemode survival @p");
+            singleplayer.getServer().runCommand("tp @p 2.5 64 -3.5");
+            context.waitTicks(5);
+            singleplayer.getConnection().waitForChunksDownload();
+            context.waitFor(client -> client.player != null
+                    && !client.player.getAbilities().instabuild
+                    && client.player.getInventory().countItem(Items.ICE) == ICE_COUNT
+                    && client.level.getBlockState(target).is(Blocks.BUBBLE_COLUMN), 600);
+            context.runOnClient(client -> {
+                configurePrinter(target);
+                Configs.Print.PRINT_REPLACE.setBooleanValue(true);
+                Configs.Print.REPLACEABLE_LIST.setStrings(
+                        List.of("minecraft:water", "minecraft:bubble_column"));
+            });
+            assertStableBubbleColumn(context, singleplayer, target, ICE_COUNT);
+            if (expectChainVein) {
+                // The same base must recreate its column after an actual ice-to-water cycle.
+                context.waitFor(client -> !ModuleManager.PRINT.isOnCooldown(target), 200);
+                singleplayer.getServer().runOnServer(server ->
+                        server.overworld().setBlockAndUpdate(target, Blocks.AIR.defaultBlockState()));
+                assertWaterProduced(context, singleplayer, target, ICE_COUNT - 1);
+                context.waitFor(client -> client.level.getBlockState(target).is(Blocks.BUBBLE_COLUMN), 600);
+                assertStableBubbleColumn(context, singleplayer, target, ICE_COUNT - 1);
+            }
+            System.out.println("[IceForWaterGameTest] PASS bubbleBase=" + base
+                    + ", ChainVein=" + expectChainVein
+                    + ": existing source preserved, recreated column does not trigger repeated ice");
+        } finally {
+            context.runOnClient(client -> cleanup(target));
+        }
+    }
+
+    private static void assertStableBubbleColumn(
+            ClientGameTestContext context, TestSingleplayerContext singleplayer,
+            BlockPos target, int expectedIce) {
+        for (int tick = 0; tick < 60; tick++) {
+            context.runOnClient(client -> {
+                assertNoWorldWait();
+                if (!client.level.getBlockState(target).is(Blocks.BUBBLE_COLUMN)
+                        || client.player.getInventory().countItem(Items.ICE) != expectedIce) {
+                    throw new AssertionError("Printer replaced an existing source bubble column with ice");
+                }
+            });
+            context.waitTick();
+        }
+        boolean unchanged = singleplayer.getServer().computeOnServer(server ->
+                server.overworld().getBlockState(target).is(Blocks.BUBBLE_COLUMN)
+                        && server.getPlayerList().getPlayers().getFirst()
+                        .getInventory().countItem(Items.ICE) == expectedIce);
+        if (!unchanged) throw new AssertionError("Source column or inventory changed on the server");
     }
 
     private static boolean shouldSkip() {
@@ -185,8 +341,8 @@ public final class IceForWaterChainVeinGameTest implements FabricClientGameTest 
         Configs.Placement.PRINT_USE_PACKET.setBooleanValue(false);
         Configs.Placement.PLACE_INTERVAL.setIntegerValue(0);
         Configs.Placement.PLACE_BLOCKS_PER_TICK.setIntegerValue(1);
-        Configs.Placement.PLACE_COOLDOWN.setIntegerValue(0);
-        Configs.Print.BREAK_COOLDOWN.setIntegerValue(0);
+        Configs.Placement.PLACE_COOLDOWN.setIntegerValue(3);
+        Configs.Print.BREAK_COOLDOWN.setIntegerValue(3);
         Configs.Print.PRINT_SELECTION_TYPE.setOptionListValue(
                 SelectionType.LITEMATICA_SELECTION);
         Configs.Print.EASY_PLACE_PROTOCOL.setBooleanValue(false);
@@ -253,7 +409,7 @@ public final class IceForWaterChainVeinGameTest implements FabricClientGameTest 
             var state = level.getBlockState(target);
             return new Result(
                     state.is(Blocks.ICE),
-                    state.is(Blocks.WATER) && level.getFluidState(target).isSource(),
+                    BlockUtils.matchesWaterSourceRequest(Blocks.WATER.defaultBlockState(), state),
                     server.getPlayerList().getPlayers().getFirst()
                             .getInventory().countItem(Items.ICE));
         });

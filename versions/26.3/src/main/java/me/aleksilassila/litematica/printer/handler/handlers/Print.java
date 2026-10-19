@@ -24,10 +24,8 @@ import me.aleksilassila.litematica.printer.utils.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.WaterFluid;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
@@ -56,9 +54,6 @@ public class Print extends Module {
     private Set<String> skipSet = Collections.emptySet();
     private Block lastSkipBlock = null;
     private boolean lastSkipResult = false;
-
-    // 等待水产生队列
-    private final List<BlockPos> watingForWaterList = new ArrayList<>();
 
     public Print() {
         super(NAME, Configs.Print.ENABLED, Configs.Print.PRINT_SELECTION_TYPE, true);
@@ -102,15 +97,6 @@ public class Print extends Module {
         }
 
         this.ctx = new SchematicBlockContext(client, level, schematic, blockPos, current, required);
-
-        // Ice-to-water phase two is a scheduler-owned marker. It must not fall into
-        // the generic wrong-block ChainBreak bucket, because executeIteration owns
-        // the break-and-wait-for-water transaction.
-        if (isIceBreakAndWaitJob()) {
-            if (!ChainVeinCompat.canBreakBlock(blockPos)) return false;
-            this.action = new Action().setItem(Items.ICE);
-            return true;
-        }
 
         if (Configs.Print.PRINT_SKIP.getBooleanValue()) {
             List<String> currentConfig = Configs.Print.PRINT_SKIP_LIST.getStrings();
@@ -182,14 +168,6 @@ public class Print extends Module {
         if (matching == BlockMatchingType.CORRECT) return null;
         if (required.isAir() && !search.breakExtra()) return null;
 
-        if (search.iceForWater()
-                && BlockUtils.isNeedsWater(required)
-                && current.getBlock() instanceof IceBlock) {
-            return search.chainVeinAvailable()
-                    ? new TransactionKey(TransactionKey.Category.ICE_WATER, Items.ICE)
-                    : null;
-        }
-
         SchematicBlockContext snapshotContext = new SchematicBlockContext(
                 client,
                 block.currentView(),
@@ -201,8 +179,7 @@ public class Print extends Module {
                     && !search.chainVeinAvailable()) {
                 return null;
             }
-            return transactionKeyFor(
-                    snapshotAction, snapshotContext, search.iceForWater());
+            return transactionKeyFor(snapshotAction, snapshotContext);
         }
 
         /*
@@ -221,6 +198,9 @@ public class Print extends Module {
             BlockState required,
             BlockState current,
             PrintSearchContext search) {
+        if (search.iceForWater() && BlockUtils.matchesWaterSourceRequest(required, current)) {
+            return BlockMatchingType.CORRECT;
+        }
         if (required.equals(current)) return BlockMatchingType.CORRECT;
         if (required.getBlock().equals(current.getBlock())) {
             return BlockUtils.statesEqualIgnoreProperties(required, current)
@@ -243,21 +223,12 @@ public class Print extends Module {
 
     @Override
     protected TransactionKey getPreparedTransactionKey(BlockPos pos) {
-        return transactionKeyFor(
-                action,
-                ctx,
-                Configs.Print.PRINT_ICE_FOR_WATER.getBooleanValue());
+        return transactionKeyFor(action, ctx);
     }
 
     private static TransactionKey transactionKeyFor(
             Action action,
-            SchematicBlockContext context,
-            boolean iceForWater) {
-        if (iceForWater
-                && BlockUtils.isNeedsWater(context.requiredState)
-                && context.currentState.getBlock() instanceof IceBlock) {
-            return new TransactionKey(TransactionKey.Category.ICE_WATER, Items.ICE);
-        }
+            SchematicBlockContext context) {
         if (action instanceof ChainBreakAction) {
             return new TransactionKey(TransactionKey.Category.CHAIN_BREAK, null);
         }
@@ -313,45 +284,14 @@ public class Print extends Module {
         }
 
         if (queued > 0) {
-            // 整批破坏是后续放置/调整的前置条件，等待客户端世界状态确认。
+            // 本 tick 不继续依赖这批破坏的动作；后续作业由持续扫描重新产生。
             skipIteration.set(true);
         }
         return attempted;
     }
 
-    private boolean isIceBreakAndWaitJob() {
-        return Configs.Print.PRINT_ICE_FOR_WATER.getBooleanValue()
-                && BlockUtils.isNeedsWater(ctx.requiredState)
-                && ctx.currentState.getBlock() instanceof IceBlock;
-    }
-
     @Override
     protected void executeIteration(BlockPos blockPos, AtomicReference<Boolean> skipIteration) {
-        if (Configs.Print.PRINT_ICE_FOR_WATER.getBooleanValue()
-            && BlockUtils.isNeedsWater(ctx.requiredState)) {
-            // 破冰后等水生成
-            if (watingForWaterList.contains(blockPos)) {
-                if (BlockUtils.isPureWaterSource(ctx.currentState))
-                    watingForWaterList.remove(blockPos);
-                else {
-                    enterWaiting(blockPos, PrinterWaitReason.WORLD_UPDATE);
-                    skipIteration.set(true);
-                    return;
-                }
-            }
-            // 单步阻塞式破冰放水：目标是水且当前是冰才触发
-            if (ctx.currentState.getBlock() instanceof IceBlock) {
-                if (ChainVeinCompat.queueBreaks(List.of(blockPos)) > 0) {
-                    watingForWaterList.add(blockPos);
-                    enterWaiting(blockPos, PrinterWaitReason.WORLD_UPDATE);
-                    skipIteration.set(true);
-                } else {
-                    setCooldown(blockPos, ConfigUtils.getBreakCooldown());
-                    addHighlight(blockPos, HighlightType.FAILED);
-                }
-                return;
-            }
-        }
         // 下落检查
         if (Configs.Placement.FALLING_CHECK.getBooleanValue()
                 && ctx.requiredState.getBlock() instanceof FallingBlock) {

@@ -119,7 +119,10 @@ public class PlacementGuide {
         }
         if (Configs.Print.PRINT_ICE_FOR_WATER.getBooleanValue()
                 && BlockUtils.isNeedsWater(ctx.requiredState)) {
-            if (!BlockUtils.isPureWaterSource(ctx.currentState) && state == BlockMatchingType.MISSING_BLOCK) {
+            if (ctx.currentState.getBlock() instanceof IceBlock) {
+                return new ChainBreakAction();
+            }
+            if (!BlockUtils.isWaterSource(ctx.currentState) && state == BlockMatchingType.MISSING_BLOCK) {
                 if (!ctx.isSnapshot() && mc.gameMode == null) {
                     return null;
                 }

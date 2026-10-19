@@ -277,10 +277,9 @@ public final class PrinterBehaviorBaselineGameTest implements FabricClientGameTe
                 () -> Configs.Print.SKIP_WATERLOGGED_BLOCK.setBooleanValue(true)));
         cases.add(new BehaviorCase("toggle.ice_for_water_place",
                 Blocks.AIR.defaultBlockState(), Blocks.WATER.defaultBlockState(),
-                Map.of(ORIGIN.below(), Blocks.COBWEB.defaultBlockState()), Map.of(), Kind.ACTION,
+                Map.of(ORIGIN.below(), Blocks.GRASS_BLOCK.defaultBlockState()), Map.of(), Kind.ACTION,
                 () -> Configs.Print.PRINT_ICE_FOR_WATER.setBooleanValue(true)));
-        // PlacementGuide intentionally skips liquid blocks here; Print scheduling owns
-        // the ICE_WATER phase marker and the consumer owns the actual break/wait action.
+        // Ice uses the same ChainBreakAction as other destructive printer jobs.
         cases.add(new BehaviorCase("scheduler.ice_for_water_break",
                 Blocks.ICE.defaultBlockState(), Blocks.WATER.defaultBlockState(),
                 Map.of(), Map.of(), Kind.BREAK,
