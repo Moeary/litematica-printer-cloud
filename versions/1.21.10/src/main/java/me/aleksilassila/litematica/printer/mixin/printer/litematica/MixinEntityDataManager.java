@@ -16,6 +16,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  */
 @Mixin(value = EntitiesDataStorage.class, remap = false)
 public abstract class MixinEntityDataManager {
+    // Litematica 0.24.9 gates synchronization inline, without isEnabled().
+    // Extend each predicate below while retaining the persisted setting.
     @ModifyExpressionValue(
             method = {
                     "onClientTick",

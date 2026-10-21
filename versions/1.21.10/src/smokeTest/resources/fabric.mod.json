@@ -9,6 +9,7 @@
       "me.aleksilassila.litematica.printer.interfaces.compat.PrinterSmokeClient"
     ]
   },
+  "mixins": ["printer-smoke.mixins.json"],
   "depends": {
     "litematica-printer": "*",
     "fabric-api": "*"

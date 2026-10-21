@@ -2,9 +2,12 @@
 
 This owned branch keeps the mapped 1.21 builds separate from the unmapped 26.x
 main branch. The starting implementation is the existing 1.21.1 port (1.1.2).
-It does not claim parity with every change in upstream 1.1.3.
+The current Minecraft 1.21.10 implementation includes the upstream 1.1.3 delta
+at b096341a114d9ffc188b385cec970ec9dd15a3a3. API-specific adapters retain the
+mapped Minecraft/Litematica interfaces and Java 21.
 
-Included additional targets: 1.21, 1.21.2 and 1.21.10. Java 21 is required.
+The active CI target is 1.21.10. Older 1.21 and 1.21.2 source remains from the
+previous 1.1.2 baseline and awaits the 1.1.3 update. Java 21 is required.
 Example: `./gradlew -Ptargets=1.21.10 :core:test :1.21.10:remapJar`.
 The existing 1.21.1 source is retained for subsequent verification.
 
@@ -19,6 +22,14 @@ not remain permanently busy; legacy stalls under loss are not a rejection.
 The standalone audit drivers are separate artifacts, never included in the
 production JAR. To build them, request `remapAuditJar` / `remapAuditServerJar`
 and provide `-PnetworkChaosJar=<absolute matching NetworkChaos JAR>`.
+
+The isolated production-client driver also exercises all seven upstream 4.1.2
+Chain AUTO-toggle transitions through the real Minecraft mouse handler, and
+three fill height filters with authoritative inventory/world assertions.
+
+Stress variants record the same-position placement cooldown separately.
+An aggressive cooldown of zero has an unresolved wrong-block observation;
+do not interpret a successful cooldown-three run as a zero-cooldown pass.
 
 The GitHub workflow checks mapped compilation and core unit tests. It does not
 claim that those checks rerun all local GUI/gameplay scenarios. It does not

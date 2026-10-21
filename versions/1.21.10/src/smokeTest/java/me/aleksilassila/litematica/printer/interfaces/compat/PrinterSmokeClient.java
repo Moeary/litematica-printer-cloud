@@ -12,6 +12,7 @@ import me.aleksilassila.litematica.printer.config.Configs;
 import me.aleksilassila.litematica.printer.enums.FillBlockModeType;
 import me.aleksilassila.litematica.printer.enums.FillModeFacingType;
 import me.aleksilassila.litematica.printer.enums.SelectionType;
+import me.aleksilassila.litematica.printer.enums.AreaSelectionType;
 import me.aleksilassila.litematica.printer.enums.ShulkerSource;
 import me.aleksilassila.litematica.printer.gui.ConfigUi;
 import me.aleksilassila.litematica.printer.handler.ModuleManager;
@@ -61,6 +62,12 @@ public final class PrinterSmokeClient implements ClientModInitializer {
     private CompletableFuture<Boolean> blockConfirmation;
     private boolean quick;
     private boolean chain;
+    private ChainAutoToggleAudit autoToggleAudit;
+    private boolean autoToggleChecked;
+    private int heightFilterCase;
+    private CompletableFuture<Boolean> heightFilterReady;
+    private static final BlockPos FILTER_LOW = new BlockPos(4, 63, 0);
+    private static final BlockPos FILTER_HIGH = new BlockPos(4, 65, 0);
 
     @Override
     public void onInitializeClient() {
@@ -118,6 +125,11 @@ public final class PrinterSmokeClient implements ClientModInitializer {
                 case 2 -> {
                     if (client.player == null || client.level == null || client.getSingleplayerServer() == null
                             || client.screen != null) return;
+                    if (chain && !autoToggleChecked) {
+                        autoToggleAudit = new ChainAutoToggleAudit(client);
+                        advance(200);
+                        return;
+                    }
                     serverWork = onServer(client, server -> {
                         var level = server.overworld();
                         var player = server.getPlayerList().getPlayers().getFirst();
@@ -133,6 +145,12 @@ public final class PrinterSmokeClient implements ClientModInitializer {
                         player.inventoryMenu.sendAllDataToRemote();
                     });
                     advance(3);
+                }
+                case 200 -> {
+                    if (!autoToggleAudit.tick()) return;
+                    autoToggleChecked = true;
+                    mark("chainvein-auto-toggle-seven-real-click-transitions");
+                    advance(2);
                 }
                 case 3 -> {
                     if (!done() || client.player.getY() < 63 || !client.player.getInventory().getItem(9).is(Items.STONE)) return;
@@ -297,7 +315,7 @@ public final class PrinterSmokeClient implements ClientModInitializer {
                     configureFill(false);
                     Configs.Placement.PRINT_USE_PACKET.setBooleanValue(false);
                     Configs.Fill.ENABLED.setBooleanValue(false);
-                    Configs.Fluid.FLUID_SELECTION_TYPE.setOptionListValue(SelectionType.LITEMATICA_SELECTION);
+                    Configs.Fluid.FLUID_SELECTION_TYPE.setOptionListValue(AreaSelectionType.ALL);
                     Configs.Fluid.FILL_FLOWING_FLUID.setBooleanValue(true);
                     Configs.Fluid.FLUID_REPLACE_BLOCK_LIST.setStrings(List.of("minecraft:sand"));
                     Configs.Fluid.FLUID_LIST.setStrings(List.of("minecraft:water"));
@@ -320,7 +338,74 @@ public final class PrinterSmokeClient implements ClientModInitializer {
                 case 21 -> {
                     if (!done()) return;
                     mark("fluid-removal-with-sand-survival");
-                    finish(client, null);
+                    advance(210);
+                }
+                case 210 -> {
+                    disable();
+                    heightFilterReady = null;
+                    serverWork = onServer(client, server -> {
+                        var world = server.overworld();
+                        world.setBlockAndUpdate(FILTER_LOW.below(), Blocks.COBBLESTONE.defaultBlockState());
+                        world.setBlockAndUpdate(FILTER_LOW, Blocks.AIR.defaultBlockState());
+                        world.setBlockAndUpdate(FILTER_HIGH.below(), Blocks.COBBLESTONE.defaultBlockState());
+                        world.setBlockAndUpdate(FILTER_HIGH, Blocks.AIR.defaultBlockState());
+                        var player = server.getPlayerList().getPlayers().getFirst();
+                        player.getInventory().clearContent();
+                        player.getInventory().setItem(9, new ItemStack(Items.STONE, 64));
+                        player.inventoryMenu.sendAllDataToRemote();
+                    });
+                    advance(211);
+                }
+                case 211 -> {
+                    if (!done() || !client.level.getBlockState(FILTER_LOW).isAir()
+                            || !client.level.getBlockState(FILTER_HIGH).isAir()
+                            || !client.player.getInventory().getItem(9).is(Items.STONE)) return;
+                    configureFill(false);
+                    var selection = DataManager.getSimpleArea();
+                    var box = selection.getSubRegionBox(selection.getName());
+                    if (box == null) box = selection.getSelectedSubRegionBox();
+                    box.setPos1(FILTER_LOW);
+                    box.setPos2(FILTER_HIGH);
+                    Configs.Fill.FILL_SELECTION_TYPE.setOptionListValue(heightFilter());
+                    ModuleManager.FILL.resetScanState();
+                    advance(212);
+                }
+                case 212 -> {
+                    boolean low = heightFilterCase != 1;
+                    boolean high = heightFilterCase != 0;
+                    if (heightFilterReady == null) {
+                        var server = client.getSingleplayerServer();
+                        heightFilterReady = CompletableFuture.supplyAsync(() -> {
+                            var world = server.overworld();
+                            return (!low || world.getBlockState(FILTER_LOW).is(Blocks.STONE))
+                                    && (!high || world.getBlockState(FILTER_HIGH).is(Blocks.STONE));
+                        }, server);
+                        return;
+                    }
+                    if (!heightFilterReady.isDone()) return;
+                    boolean ready = heightFilterReady.join();
+                    heightFilterReady = null;
+                    if (!ready) return;
+                    // Leave excluded targets available for several scan rounds;
+                    // they must stay empty while the real fill module runs.
+                    if (ticks < 30) return;
+                    disable();
+                    serverWork = onServer(client, server -> {
+                        var world = server.overworld();
+                        check(low ? world.getBlockState(FILTER_LOW).is(Blocks.STONE) : world.getBlockState(FILTER_LOW).isAir(),
+                                "Below-player fill boundary incorrect for " + heightFilter());
+                        check(high ? world.getBlockState(FILTER_HIGH).is(Blocks.STONE) : world.getBlockState(FILTER_HIGH).isAir(),
+                                "Above-player fill boundary incorrect for " + heightFilter());
+                        check(countStone(server) == 64 - (low ? 1 : 0) - (high ? 1 : 0),
+                                "Height-filter fill lost or duplicated stone");
+                    });
+                    advance(213);
+                }
+                case 213 -> {
+                    if (!done()) return;
+                    mark("fill-height-filter-" + heightFilter());
+                    if (++heightFilterCase < 3) advance(210);
+                    else finish(client, null);
                 }
             }
         } catch (Throwable failure) {
@@ -354,13 +439,21 @@ public final class PrinterSmokeClient implements ClientModInitializer {
         Configs.Print.ENABLED.setBooleanValue(false);
         Configs.Fluid.ENABLED.setBooleanValue(false);
         Configs.Bedrock.ENABLED.setBooleanValue(false);
-        Configs.Fill.FILL_SELECTION_TYPE.setOptionListValue(SelectionType.LITEMATICA_SELECTION);
+        Configs.Fill.FILL_SELECTION_TYPE.setOptionListValue(AreaSelectionType.ALL);
         Configs.Fill.FILL_BLOCK_MODE.setOptionListValue(FillBlockModeType.BLOCKLIST);
         Configs.Fill.FILL_BLOCK_LIST.setStrings(List.of("minecraft:stone"));
         Configs.Fill.FILL_BLOCK_FACING.setOptionListValue(FillModeFacingType.DOWN);
         Configs.Fill.ENABLED.setBooleanValue(true);
         ModuleManager.FILL.resetScanState();
         Configs.Core.WORK_SWITCH.setBooleanValue(true);
+    }
+
+    private AreaSelectionType heightFilter() {
+        return switch (heightFilterCase) {
+            case 0 -> AreaSelectionType.BELOW_PLAYER;
+            case 1 -> AreaSelectionType.ABOVE_PLAYER;
+            default -> AreaSelectionType.ALL;
+        };
     }
 
     private static CompletableFuture<Void> resetTarget(Minecraft client, Item item,

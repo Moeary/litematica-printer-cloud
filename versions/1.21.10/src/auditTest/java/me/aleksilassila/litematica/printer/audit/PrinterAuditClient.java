@@ -105,6 +105,7 @@ public final class PrinterAuditClient implements ClientModInitializer {
     @Override public void onInitializeClient() {
         report.put("servuxEnabled", servux);
         report.put("case", test);
+        report.put("samePositionCooldown", Integer.getInteger("printer.audit.placeCooldown", 0));
         report.put("minecraft", FabricLoader.getInstance().getModContainer("minecraft").orElseThrow()
                 .getMetadata().getVersion().getFriendlyString());
         report.put("miner", miner);
@@ -308,7 +309,7 @@ public final class PrinterAuditClient implements ClientModInitializer {
                 disable(); advance(5);
             }
         } else if (phase == 5) {
-            if (QuickShulkerCompat.isBusy() && ticks < 100) return;
+            if (QuickShulkerCompat.isBusy() && ticks < 160) return;
             NetworkChaos.disable();
             report.put("loss", NetworkChaos.stats());
             work = dedicated ? rpc("stopLoss").thenAccept(result -> report.put("dedicatedServerLoss", result.get("loss")))
@@ -343,7 +344,7 @@ public final class PrinterAuditClient implements ClientModInitializer {
             check(dropped >= 10, "Stress did not exercise meaningful real packet loss: " + dropped);
             check(directObserved, "Actual direct API path was never selected");
             check(!foreignContainer, "Direct transfer opened a foreign container");
-            check(!QuickShulkerCompat.isBusy(), "Direct API remains busy after 800-tick window and 100-tick drain");
+            check(!QuickShulkerCompat.isBusy(), "Direct API remains busy after 800-tick window and upstream 160-tick drain");
             if (servux) {
                 var protocol = (Map<?, ?>) lastServer.get("servuxProtocol");
                 check(((Number) protocol.get("metadataRequests")).intValue() >= 1,
@@ -431,7 +432,7 @@ public final class PrinterAuditClient implements ClientModInitializer {
         Configs.Core.LAG_CHECK.setBooleanValue(false); Configs.Core.WORK_RANGE.setDoubleValue(24);
         Configs.Placement.PRINT_USE_PACKET.setBooleanValue(false);
         Configs.Placement.PLACE_INTERVAL.setIntegerValue(0); Configs.Placement.PLACE_BLOCKS_PER_TICK.setIntegerValue(16);
-        Configs.Placement.PLACE_COOLDOWN.setIntegerValue(0);
+        Configs.Placement.PLACE_COOLDOWN.setIntegerValue(Integer.getInteger("printer.audit.placeCooldown", 0));
         Configs.Print.PRINT_SELECTION_TYPE.setOptionListValue(SelectionType.LITEMATICA_SELECTION);
         Configs.Print.EASY_PLACE_PROTOCOL.setBooleanValue(false); Configs.Print.PLACE_IN_AIR.setBooleanValue(false);
         Configs.Print.PRINT_SKIP.setBooleanValue(false); Configs.Print.PRINT_REPLACE.setBooleanValue(false);
