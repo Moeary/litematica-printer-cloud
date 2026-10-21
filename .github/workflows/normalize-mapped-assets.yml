@@ -1,0 +1,31 @@
+name: Normalize mapped release filenames
+on:
+  push:
+    branches: ["dory/1.21.x"]
+    paths: [".github/workflows/normalize-mapped-assets.yml"]
+permissions:
+  contents: write
+jobs:
+  rename:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Rename the existing tested artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 - <<'PY'
+          import json, os, urllib.request
+          base = "https://api.github.com/repos/water2004/litematica-printer"
+          headers = {"Authorization":"Bearer "+os.environ["GH_TOKEN"], "Accept":"application/vnd.github+json", "X-GitHub-Api-Version":"2022-11-28"}
+          def api(path, data=None):
+              req=urllib.request.Request(base+path, data=None if data is None else json.dumps(data).encode(), headers=headers, method="GET" if data is None else "PATCH")
+              with urllib.request.urlopen(req, timeout=60) as r: return json.load(r)
+          asset=api("/releases/assets/662179546")
+          assert asset["name"] in ["litematica-printer-1.1.2-backport.1+1.21.10.jar","litematica-printer-1.1.2+1.21.10.jar"]
+          assert asset["digest"] == "sha256:7fda5aba7385db2b9e44df5cfb0b9ecf644de09e7ed3f4d034502abc2ad2c179"
+          assert asset["size"] == 793364
+          if asset["name"] != "litematica-printer-1.1.2+1.21.10.jar":
+              asset=api("/releases/assets/662179546", {"name":"litematica-printer-1.1.2+1.21.10.jar"})
+          assert asset["name"] == "litematica-printer-1.1.2+1.21.10.jar" and asset["digest"] == "sha256:7fda5aba7385db2b9e44df5cfb0b9ecf644de09e7ed3f4d034502abc2ad2c179"
+          print(asset["browser_download_url"])
+          PY
