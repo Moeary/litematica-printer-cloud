@@ -1264,7 +1264,7 @@ public final class AsyncSearchCoordinator {
                         spec,
                         maxHalo,
                         geometry.level().getMinY(),
-                        geometry.level().getMaxY());
+                        (geometry.level().getMaxY() + 1));
                 PageWindow currentWindow = currentPages.register(
                         pageRange, consumers);
                 PageWindow requiredWindow = requiredPages == null

@@ -132,8 +132,10 @@ public class ModuleManager {
             if (module.getWaitingReason() == PrinterWaitReason.WORLD_UPDATE) {
                 return PrinterStatus.WAITING_FOR_WORLD;
             }
-            return shulkerPending
-                    ? PrinterStatus.WAITING_FOR_SHULKER
+            if (shulkerPending) return PrinterStatus.WAITING_FOR_SHULKER;
+            return module.getWaitingReason() == PrinterWaitReason.SERVUX_HAND_CONFIRMATION
+                    && Configs.Print.SERVUX_HAND_CONFIRMATION.getBooleanValue()
+                    ? PrinterStatus.WAITING_FOR_SERVUX_HAND
                     : PrinterStatus.WAITING_FOR_HAND;
         }
 

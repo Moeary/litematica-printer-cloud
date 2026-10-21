@@ -7,6 +7,8 @@
     "defaultRequire": 1
   },
   "mixins": [
-    "AuditServuxServerMixin"
+    "AuditServuxServerMixin",
+    "AuditNetworkSendMixin",
+    "AuditServerPacketMixin"
   ]
 }

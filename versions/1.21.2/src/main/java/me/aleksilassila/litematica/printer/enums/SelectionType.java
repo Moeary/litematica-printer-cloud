@@ -2,6 +2,7 @@ package me.aleksilassila.litematica.printer.enums;
 
 import me.aleksilassila.litematica.printer.I18n;
 import me.aleksilassila.litematica.printer.config.ConfigOptionListEntry;
+import me.aleksilassila.litematica.printer.core.spatial.PlayerHeightFilter;
 
 public enum SelectionType implements ConfigOptionListEntry<SelectionType> {
     /**
@@ -25,6 +26,14 @@ public enum SelectionType implements ConfigOptionListEntry<SelectionType> {
 
     SelectionType(String translateKey) {
         this.i18n = I18n.of(translateKey);
+    }
+
+    public PlayerHeightFilter heightFilter() {
+        return switch (this) {
+            case LITEMATICA_SELECTION_BELOW_PLAYER -> PlayerHeightFilter.BELOW_PLAYER;
+            case LITEMATICA_SELECTION_ABOVE_PLAYER -> PlayerHeightFilter.ABOVE_PLAYER;
+            default -> PlayerHeightFilter.ALL;
+        };
     }
 
     @Override

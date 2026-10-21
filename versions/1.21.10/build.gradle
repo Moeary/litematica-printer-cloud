@@ -94,7 +94,7 @@ tasks.register('remapAuditJar', net.fabricmc.loom.task.RemapJarTask) {
 
 tasks.register('auditServerJar', Jar) {
     archiveClassifier = 'audit-server-dev'
-    from(sourceSets.auditTest.output.classesDirs) { include '**/PrinterAuditServer*.class', '**/AuditServuxServerMixin.class', '**/AuditServuxCounters.class' }
+    from(sourceSets.auditTest.output.classesDirs) { include '**/PrinterAuditServer*.class', '**/AuditServuxServerMixin.class', '**/AuditServuxCounters.class', '**/AuditPacketTrace.class', '**/AuditNetworkSendMixin.class', '**/AuditServerPacketMixin.class', '**/AuditFaultProfile.class' }
     from(layout.buildDirectory.dir('classes/java/auditTest')) { include '**/*refmap.json' }
     from 'src/auditServerResources'
     dependsOn tasks.named('auditTestClasses')

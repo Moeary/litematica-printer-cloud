@@ -1,6 +1,7 @@
 package me.aleksilassila.litematica.printer.handler.handlers;
 
 import me.aleksilassila.litematica.printer.config.Configs;
+import me.aleksilassila.litematica.printer.enums.AreaSelectionType;
 import me.aleksilassila.litematica.printer.enums.HighlightType;
 import me.aleksilassila.litematica.printer.handler.AsyncSearchCoordinator;
 import me.aleksilassila.litematica.printer.handler.Module;
@@ -30,7 +31,9 @@ public class FluidRemoval extends Module {
     private List<net.minecraft.world.level.material.Fluid> fluids = List.of(new net.minecraft.world.level.material.Fluid[0]);
 
     public FluidRemoval() {
-        super(NAME, Configs.Fluid.ENABLED, Configs.Fluid.FLUID_SELECTION_TYPE, true);
+        super(NAME, Configs.Fluid.ENABLED,
+                () -> ((AreaSelectionType) Configs.Fluid.FLUID_SELECTION_TYPE.getOptionListValue()).heightFilter(),
+                true);
     }
 
     @Override
@@ -119,8 +122,8 @@ public class FluidRemoval extends Module {
             InventoryUtils.ItemSwitchResult switchResult =
                     InventoryUtils.switchToItemsResult(player, fillItems.toArray(new Item[0]));
             if (switchResult != InventoryUtils.ItemSwitchResult.READY) {
-                if (switchResult == InventoryUtils.ItemSwitchResult.WAITING) {
-                    enterWaiting(blockPos);
+                if (switchResult.isWaiting()) {
+                    enterWaiting(blockPos, switchResult.waitingReason());
                     skipIteration.set(true);
                     return;
                 }

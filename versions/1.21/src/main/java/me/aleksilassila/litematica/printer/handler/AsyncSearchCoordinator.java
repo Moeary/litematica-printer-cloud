@@ -12,6 +12,7 @@ import me.aleksilassila.litematica.printer.printer.PrinterBox;
 import me.aleksilassila.litematica.printer.utils.LitematicaUtils;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.SignalGetter;
 import net.minecraft.world.level.block.Blocks;
@@ -28,6 +29,8 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * 全模块共用的异步搜索管线。
@@ -38,6 +41,16 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class AsyncSearchCoordinator {
     public static final AsyncSearchCoordinator INSTANCE = new AsyncSearchCoordinator();
+
+    private static final boolean PROFILE_SCAN = Boolean.getBoolean(
+            "litematica-printer.gametest.scanPerformance")
+            || Boolean.getBoolean(
+                    "litematica-printer.gametest.fullPrintPerformance");
+    private static final AtomicLong PROFILE_SEQUENCE = new AtomicLong();
+    private static final ConcurrentLinkedQueue<RoundProfile> ROUND_PROFILES =
+            new ConcurrentLinkedQueue<>();
+    @Nullable
+    private static volatile RoundProfile lastRoundProfile;
 
     /** 预编译形状掩码的叶块体积上限；小于旧的固定 8^3 调度块。 */
     static final int MASK_TILE_MAX_VOLUME = 128;
@@ -70,24 +83,46 @@ public final class AsyncSearchCoordinator {
         return rounds.isBusy();
     }
 
-    private static SearchTileSnapshot captureSmallSnapshot(WorkUnit unit) {
+    public static void resetRoundProfileForTesting() {
+        lastRoundProfile = null;
+        ROUND_PROFILES.clear();
+    }
+
+    @Nullable
+    public static RoundProfile getLastRoundProfileForTesting() {
+        return lastRoundProfile;
+    }
+
+    public static List<RoundProfile> drainRoundProfilesForTesting() {
+        List<RoundProfile> profiles = new ArrayList<>();
+        RoundProfile profile;
+        while ((profile = ROUND_PROFILES.poll()) != null) {
+            profiles.add(profile);
+        }
+        return List.copyOf(profiles);
+    }
+
+    private static SnapshotCapture captureSmallSnapshot(WorkUnit unit) {
         SearchTileSnapshot cached = unit.shared().snapshot();
-        if (cached != null) return cached;
+        if (cached != null) return new SnapshotCapture(cached, false);
 
         SearchRequest request = unit.shared().group().representative();
         TileSpec spec = unit.shared().spec();
-        SnapshotBlockView currentView = unit.shared().currentPages()
+        ViewCapture currentCapture = unit.shared().currentPages()
                 .capture(unit.shared().currentWindow());
-        SnapshotBlockView requiredView = unit.shared().requiredPages() == null
-                ? emptyView(Blocks.AIR.defaultBlockState(), request.level())
+        ViewCapture requiredCapture = unit.shared().requiredPages() == null
+                ? ViewCapture.empty(emptyView(
+                        Blocks.AIR.defaultBlockState(), request.level()))
                 : unit.shared().requiredPages()
                         .capture(unit.shared().requiredWindow());
 
         SearchTileSnapshot snapshot = new SearchTileSnapshot(
                 spec,
                 request.bounds(),
-                currentView,
-                requiredView,
+                currentCapture.newlyCapturedPositions(),
+                requiredCapture.newlyCapturedPositions(),
+                currentCapture.view(),
+                requiredCapture.view(),
                 unit.shared().requiredPages() != null,
                 unit.shared().shapeMask(),
                 unit.shared().shapeFull(),
@@ -98,7 +133,7 @@ public final class AsyncSearchCoordinator {
                 unit.shared().workspaces(),
                 false);
         unit.shared().setSnapshot(snapshot);
-        return snapshot;
+        return new SnapshotCapture(snapshot, true);
     }
 
     private static SearchTileSnapshot emptySnapshot(
@@ -110,7 +145,8 @@ public final class AsyncSearchCoordinator {
         SnapshotBlockView required = emptyView(
                 Blocks.AIR.defaultBlockState(), request.level());
         return new SearchTileSnapshot(
-                spec, request.bounds(), current, required, false,
+                spec, request.bounds(), 0L, 0L,
+                current, required, false,
                 unit.shared().shapeMask(), unit.shared().shapeFull(),
                 unit.shared().originX(), unit.shared().originY(),
                 unit.shared().originZ(), unit.shared().modes(),
@@ -371,6 +407,8 @@ public final class AsyncSearchCoordinator {
     public static final class SearchTileSnapshot {
         private final TileSpec spec;
         private final SearchBounds bounds;
+        private final long capturedCurrentPositions;
+        private final long capturedRequiredPositions;
         private final SnapshotBlockView currentView;
         private final SnapshotBlockView requiredView;
         private final boolean includeRequired;
@@ -386,6 +424,8 @@ public final class AsyncSearchCoordinator {
         private SearchTileSnapshot(
                 TileSpec spec,
                 SearchBounds bounds,
+                long capturedCurrentPositions,
+                long capturedRequiredPositions,
                 SnapshotBlockView currentView,
                 SnapshotBlockView requiredView,
                 boolean includeRequired,
@@ -399,6 +439,8 @@ public final class AsyncSearchCoordinator {
                 boolean empty) {
             this.spec = spec;
             this.bounds = bounds;
+            this.capturedCurrentPositions = capturedCurrentPositions;
+            this.capturedRequiredPositions = capturedRequiredPositions;
             this.currentView = currentView;
             this.requiredView = requiredView;
             this.includeRequired = includeRequired;
@@ -420,6 +462,14 @@ public final class AsyncSearchCoordinator {
             return spec.volume();
         }
 
+        public long capturedCurrentPositions() {
+            return capturedCurrentPositions;
+        }
+
+        public long capturedRequiredPositions() {
+            return capturedRequiredPositions;
+        }
+
         public SnapshotBlockView currentView() {
             return currentView;
         }
@@ -433,7 +483,9 @@ public final class AsyncSearchCoordinator {
         }
     }
 
-    /** 搜索线程可见的只读分页视图。页对象不可变，同轮任务可以安全共享。 */
+    /**
+     * 搜索线程可见的只读分页视图。页对象不可变，同轮任务可以安全共享。
+     */
     public static final class SnapshotBlockView implements SignalGetter {
         private final PageSlot[] slots;
         private final int minPageX;
@@ -596,6 +648,10 @@ public final class AsyncSearchCoordinator {
             this.sizeZ = sizeZ;
         }
 
+        long volume() {
+            return (long) sizeX * sizeY * sizeZ;
+        }
+
         BlockState get(int worldX, int worldY, int worldZ, BlockState fallback) {
             int x = worldX - minX;
             int y = worldY - minY;
@@ -611,8 +667,17 @@ public final class AsyncSearchCoordinator {
     public record SearchTileResult(
             int ordinal,
             long scannedPositions,
+            long acceptedPositions,
             List<JobPool.Job<BlockPos, TransactionKey>> jobs,
             @Nullable Object payload) {
+        public SearchTileResult(
+                int ordinal,
+                long scannedPositions,
+                List<JobPool.Job<BlockPos, TransactionKey>> jobs,
+                @Nullable Object payload) {
+            this(ordinal, scannedPositions, 0L, jobs, payload);
+        }
+
         public static SearchTileResult jobs(
                 SearchTileSnapshot snapshot,
                 List<JobPool.Job<BlockPos, TransactionKey>> jobs) {
@@ -675,6 +740,11 @@ public final class AsyncSearchCoordinator {
         }
     }
 
+    /**
+     * Immutable, translation-independent spatial mask. It compiles a configured
+     * shape into small boxes and marks boxes wholly inside the shape so the hot
+     * loop only evaluates the integer predicate on the boundary.
+     */
     private static final class CompiledShapeMask {
         private final RadiusShapeType shape;
         private final double range;
@@ -1032,19 +1102,24 @@ public final class AsyncSearchCoordinator {
             return new PageWindow(range, windowSlots);
         }
 
-        SnapshotBlockView capture(PageWindow window) {
+        ViewCapture capture(PageWindow window) {
+            long newlyCaptured = 0L;
             for (PageSlot slot : window.slots()) {
-                if (slot.page == null) {
-                    slot.page = capturePage(
-                            slot.pageX, slot.pageY, slot.pageZ);
+                SnapshotPage page = slot.page;
+                if (page == null) {
+                    page = capturePage(slot.pageX, slot.pageY, slot.pageZ);
+                    slot.page = page;
+                    newlyCaptured += page.volume();
                 }
             }
             PageRange range = window.range();
-            return new SnapshotBlockView(
-                    window.slots(),
-                    range.minPageX(), range.minPageY(), range.minPageZ(),
-                    range.countX(), range.countY(), range.countZ(),
-                    fallback, worldMinY, height);
+            return new ViewCapture(
+                    new SnapshotBlockView(
+                            window.slots(),
+                            range.minPageX(), range.minPageY(), range.minPageZ(),
+                            range.countX(), range.countY(), range.countZ(),
+                            fallback, worldMinY, height),
+                    newlyCaptured);
         }
 
         void release(PageWindow window) {
@@ -1087,6 +1162,19 @@ public final class AsyncSearchCoordinator {
         private static long pageKey(int pageX, int pageY, int pageZ) {
             return BlockPos.asLong(pageX, pageY, pageZ);
         }
+    }
+
+    private record ViewCapture(
+            SnapshotBlockView view,
+            long newlyCapturedPositions) {
+        static ViewCapture empty(SnapshotBlockView view) {
+            return new ViewCapture(view, 0L);
+        }
+    }
+
+    private record SnapshotCapture(
+            SearchTileSnapshot snapshot,
+            boolean newlyCreated) {
     }
 
     private record WorkUnit(
@@ -1341,6 +1429,9 @@ public final class AsyncSearchCoordinator {
         private final List<SearchTileResult> results;
         private final AtomicLongCounter completedPositions = new AtomicLongCounter();
         private long targetBit;
+        private long capturedCurrentPositions;
+        private long capturedRequiredPositions;
+        private long acceptedPositions;
         private long plannedPositions;
 
         private RequestWork(SearchRequest request) {
@@ -1380,6 +1471,17 @@ public final class AsyncSearchCoordinator {
         long plannedPositions() {
             return plannedPositions;
         }
+
+        void captured(SearchTileSnapshot snapshot, boolean newlyCreated) {
+            if (newlyCreated) {
+                capturedCurrentPositions += snapshot.capturedCurrentPositions();
+                capturedRequiredPositions += snapshot.capturedRequiredPositions();
+            }
+        }
+
+        void addAcceptedPositions(long count) {
+            acceptedPositions += count;
+        }
     }
 
     /**
@@ -1398,6 +1500,13 @@ public final class AsyncSearchCoordinator {
             AsyncRoundCoordinator.Round<WorkUnit, CapturedSearch, SearchTileResult> {
         private final List<SearchRequest> requests;
         private List<RequestWork> requestWork = List.of();
+        private long startedNanos;
+        private long planNanos;
+        private long captureNanos;
+        private final AtomicLong searchNanos = new AtomicLong();
+        private long completionNanos;
+        private long publishNanos;
+        private long capturedTileSnapshots;
 
         private SearchRound(List<SearchRequest> requests) {
             this.requests = requests;
@@ -1405,6 +1514,7 @@ public final class AsyncSearchCoordinator {
 
         @Override
         public List<WorkUnit> prepare() {
+            startedNanos = System.nanoTime();
             List<RequestWork> prepared = new ArrayList<>(requests.size());
             List<CaptureGroup> groups = new ArrayList<>();
             ArrayDeque<WorkUnit> pending = new ArrayDeque<>();
@@ -1474,25 +1584,42 @@ public final class AsyncSearchCoordinator {
                 work.request().owner().searchRoundStarted(
                         work.request(), work.plannedPositions());
             }
+            planNanos = System.nanoTime() - startedNanos;
             return List.copyOf(pending);
         }
 
         @Override
         public CapturedSearch capture(WorkUnit unit) {
+            long profileStarted = PROFILE_SCAN ? System.nanoTime() : 0L;
             SearchRequest request = unit.work().request();
-            return new CapturedSearch(
+            SnapshotCapture capture = captureSmallSnapshot(unit);
+            if (PROFILE_SCAN) {
+                if (capture.newlyCreated()) capturedTileSnapshots++;
+                unit.work().captured(
+                        capture.snapshot(), capture.newlyCreated());
+            }
+            CapturedSearch result = new CapturedSearch(
                     request.owner(),
                     request.context(),
-                    captureSmallSnapshot(unit),
+                    capture.snapshot(),
                     unit.work().targetBit());
+            if (PROFILE_SCAN) captureNanos += System.nanoTime() - profileStarted;
+            return result;
         }
 
         @Override
         public SearchTileResult search(CapturedSearch captured) {
-            return captured.owner().searchSnapshotTile(
-                    captured.context(),
-                    captured.snapshot(),
-                    captured.targetBit());
+            long profileStarted = PROFILE_SCAN ? System.nanoTime() : 0L;
+            try {
+                return captured.owner().searchSnapshotTile(
+                        captured.context(),
+                        captured.snapshot(),
+                        captured.targetBit());
+            } finally {
+                if (PROFILE_SCAN) {
+                    searchNanos.addAndGet(System.nanoTime() - profileStarted);
+                }
+            }
         }
 
         @Override
@@ -1526,22 +1653,94 @@ public final class AsyncSearchCoordinator {
 
         @Override
         public void completed(WorkUnit unit, SearchTileResult result) {
+            long profileStarted = PROFILE_SCAN ? System.nanoTime() : 0L;
             unit.releasePages();
             RequestWork work = unit.work();
             work.results().add(result);
+            if (PROFILE_SCAN) work.addAcceptedPositions(
+                    result.acceptedPositions());
             long scanned = work.completedPositions().addAndGet(
                     result.scannedPositions());
             work.request().owner().searchRoundProgress(
                     work.request(), scanned, work.plannedPositions());
+            if (PROFILE_SCAN) {
+                completionNanos += System.nanoTime() - profileStarted;
+            }
         }
 
         @Override
         public void finish() {
             for (RequestWork work : requestWork) {
                 work.results().sort(Comparator.comparingInt(SearchTileResult::ordinal));
+            }
+
+            long scanNanos = System.nanoTime() - startedNanos;
+            List<RequestProfile> profiles = PROFILE_SCAN
+                    ? requestWork.stream().map(SearchRound::profile).toList()
+                    : List.of();
+
+            long publishStarted = PROFILE_SCAN ? System.nanoTime() : 0L;
+            for (RequestWork work : requestWork) {
                 work.request().owner().publishSearchRound(
                         work.request(), List.copyOf(work.results()));
             }
+            if (PROFILE_SCAN) publishNanos = System.nanoTime() - publishStarted;
+
+            if (PROFILE_SCAN) {
+                RoundProfile profile = new RoundProfile(
+                        PROFILE_SEQUENCE.incrementAndGet(), scanNanos, planNanos,
+                        captureNanos, searchNanos.get(), completionNanos,
+                        publishNanos,
+                        capturedTileSnapshots, profiles);
+                lastRoundProfile = profile;
+                ROUND_PROFILES.add(profile);
+            }
+        }
+
+        private static RequestProfile profile(RequestWork work) {
+            long jobCount = 0L;
+            long jobXor = 0L;
+            long jobSum = 0L;
+            long chainBreakJobs = 0L;
+            for (SearchTileResult result : work.results()) {
+                for (JobPool.Job<BlockPos, TransactionKey> job : result.jobs()) {
+                    long fingerprint = fingerprint(job);
+                    jobCount++;
+                    jobXor ^= fingerprint;
+                    jobSum += fingerprint;
+                    if (job.key().category() == TransactionKey.Category.CHAIN_BREAK) {
+                        chainBreakJobs++;
+                    }
+                }
+            }
+            long stateReads = work.capturedCurrentPositions
+                    + work.capturedRequiredPositions;
+            return new RequestProfile(
+                    work.request().owner().getId(),
+                    work.request().bounds().volume(),
+                    work.results().size(),
+                    work.capturedCurrentPositions,
+                    stateReads,
+                    work.acceptedPositions,
+                    jobCount,
+                    jobXor,
+                    jobSum,
+                    chainBreakJobs);
+        }
+
+        private static long fingerprint(JobPool.Job<BlockPos, TransactionKey> job) {
+            TransactionKey key = job.key();
+            long value = job.position().asLong();
+            value ^= (long) key.category().ordinal() << 56;
+            if (key.primaryItem() != null) {
+                value ^= (long) BuiltInRegistries.ITEM.getKey(key.primaryItem())
+                        .toString().hashCode() << 17;
+            }
+            value ^= value >>> 30;
+            value *= 0xbf58476d1ce4e5b9L;
+            value ^= value >>> 27;
+            value *= 0x94d049bb133111ebL;
+            return value ^ value >>> 31;
         }
 
         @Override
@@ -1550,4 +1749,33 @@ public final class AsyncSearchCoordinator {
         }
     }
 
+    public record RoundProfile(
+            long sequence,
+            long scanNanos,
+            long planNanos,
+            long captureNanos,
+            long searchNanos,
+            long completionNanos,
+            long publishNanos,
+            long capturedTileSnapshots,
+            List<RequestProfile> requests) {
+
+        public long activeWorkNanos() {
+            return planNanos + captureNanos + searchNanos
+                    + completionNanos + publishNanos;
+        }
+    }
+
+    public record RequestProfile(
+            String moduleId,
+            long boundsVolume,
+            int tileCount,
+            long capturedPositions,
+            long stateReads,
+            long acceptedPositions,
+            long jobCount,
+            long jobXor,
+            long jobSum,
+            long chainBreakJobs) {
+    }
 }

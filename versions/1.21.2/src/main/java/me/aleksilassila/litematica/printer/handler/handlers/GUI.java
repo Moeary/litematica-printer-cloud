@@ -3,6 +3,7 @@ package me.aleksilassila.litematica.printer.handler.handlers;
 import fi.dy.masa.malilib.config.options.ConfigBase;
 import lombok.Getter;
 import me.aleksilassila.litematica.printer.config.Configs;
+import me.aleksilassila.litematica.printer.core.spatial.PlayerHeightFilter;
 import me.aleksilassila.litematica.printer.enums.BlockMatchingType;
 import me.aleksilassila.litematica.printer.handler.AsyncSearchCoordinator;
 import me.aleksilassila.litematica.printer.handler.Module;
@@ -31,7 +32,7 @@ public class GUI extends Module {
     @Getter
     private final Progress fillProgress = new Progress(Configs.Fill.ENABLED);
     public GUI() {
-        super(NAME, Configs.Core.RENDER_HUD, null, true);
+        super(NAME, Configs.Core.RENDER_HUD, () -> PlayerHeightFilter.ALL, true);
     }
 
     @Override

@@ -57,6 +57,10 @@ public enum BlockMatchingType {
     }
 
     public static BlockMatchingType get(BlockState requiredState, BlockState currentState, Property<?>... propertiesToIgnore) {
+        if (Configs.Print.PRINT_ICE_FOR_WATER.getBooleanValue()
+                && BlockUtils.matchesWaterSourceRequest(requiredState, currentState)) {
+            return CORRECT;
+        }
         // 如果两个方块状态完全相同（包括属性和值），则返回正确状态
         // 注意：必须使用 equals() 而非 ==，因为 requiredState 来自世界快照（SchematicWorldHandler）
         // 而 currentState 来自实际世界（Minecraft.getInstance().level），不同 Level 实例的 BlockState 对象不共享

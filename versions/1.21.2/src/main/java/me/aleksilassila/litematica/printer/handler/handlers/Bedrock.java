@@ -3,6 +3,7 @@ package me.aleksilassila.litematica.printer.handler.handlers;
 import me.aleksilassila.litematica.printer.I18n;
 import me.aleksilassila.litematica.printer.utils.ModUtils;
 import me.aleksilassila.litematica.printer.config.Configs;
+import me.aleksilassila.litematica.printer.core.spatial.PlayerHeightFilter;
 import me.aleksilassila.litematica.printer.enums.HighlightType;
 import me.aleksilassila.litematica.printer.handler.AsyncSearchCoordinator;
 import me.aleksilassila.litematica.printer.handler.Module;
@@ -18,7 +19,7 @@ public class Bedrock extends Module {
     public final static String NAME = "bedrock";
 
     public Bedrock() {
-        super(NAME, Configs.Bedrock.ENABLED, null, true);
+        super(NAME, Configs.Bedrock.ENABLED, () -> PlayerHeightFilter.ALL, true);
     }
 
     @Override
@@ -42,10 +43,13 @@ public class Bedrock extends Module {
             MessageUtils.setOverlayMessage(I18n.BEDROCK_CREATIVE_MODE.getName());
             return false;
         }
-        if (!ModUtils.isBedrockMinerLoaded() && !ModUtils.isBlockMinerLoaded()) {
-            if (ModUtils.isLoadMod("bedrock-miner"))
-                MessageUtils.setOverlayMessage(I18n.BEDROCK_NOT_SUPPORT.getName());
+        if (!ModUtils.isBedrockMinerLoaded() && !ModUtils.isBlockMinerLoaded()
+                && !ModUtils.isFabricBedrockMinerLoaded()) {
             MessageUtils.setOverlayMessage(I18n.BEDROCK_MOD_MISSING.getName());
+            return false;
+        }
+        if (!BedrockCompat.isAvailable()) {
+            MessageUtils.setOverlayMessage(I18n.BEDROCK_NOT_SUPPORT.getName());
             return false;
         }
         if (!BedrockCompat.isWorking()) {
@@ -78,7 +82,8 @@ public class Bedrock extends Module {
     @Override
     protected boolean canSearch() {
         return super.canSearch()
-                && (ModUtils.isBedrockMinerLoaded() || ModUtils.isBlockMinerLoaded());
+                && (ModUtils.isBedrockMinerLoaded() || ModUtils.isBlockMinerLoaded()
+                    || ModUtils.isFabricBedrockMinerLoaded());
     }
 
     @Override

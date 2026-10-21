@@ -55,6 +55,7 @@ public final class PrinterSmokeClient implements ClientModInitializer {
     private static final BlockPos PLACE = new BlockPos(1, 64, 0);
     private static final BlockPos BREAK = new BlockPos(2, 64, 0);
     private final List<String> passed = new ArrayList<>();
+    private Latest113WaterAudit waterAudit;
     private int stage;
     private int ticks;
     private long deadline;
@@ -405,7 +406,11 @@ public final class PrinterSmokeClient implements ClientModInitializer {
                     if (!done()) return;
                     mark("fill-height-filter-" + heightFilter());
                     if (++heightFilterCase < 3) advance(210);
-                    else finish(client, null);
+                    else advance(220);
+                }
+                case 220 -> {
+                    if (waterAudit == null) waterAudit = new Latest113WaterAudit(client, this::mark);
+                    if (waterAudit.tick()) finish(client, null);
                 }
             }
         } catch (Throwable failure) {

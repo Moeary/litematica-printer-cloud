@@ -106,6 +106,9 @@ public final class PrinterAuditClient implements ClientModInitializer {
         report.put("servuxEnabled", servux);
         report.put("case", test);
         report.put("samePositionCooldown", Integer.getInteger("printer.audit.placeCooldown", 0));
+        report.put("packetTraceBuffered", Boolean.getBoolean("printer.audit.traceBuffered"));
+        report.put("faultProfile", AuditFaultProfile.description());
+        report.put("targetLayout", Boolean.getBoolean("printer.audit.rotatedMaterials") ? "rotating material rows" : "upstream material columns");
         report.put("minecraft", FabricLoader.getInstance().getModContainer("minecraft").orElseThrow()
                 .getMetadata().getVersion().getFriendlyString());
         report.put("miner", miner);
@@ -282,10 +285,9 @@ public final class PrinterAuditClient implements ClientModInitializer {
         } else if (phase == 30) {
             if (!done()) return;
             configureStress();
-            LinkProfile lossy = new LinkProfile(0.15, 0, 0, 0, 0, 0);
-            NetworkChaos.enable(new ChaosConfig(lossy, lossy, 0x515549434B53484CL, true,
-                    ChaosConfig.ALL_PACKETS, ChaosConfig.NO_PACKETS));
-            report.put("lossRate", 0.15); report.put("targetPositions", TARGETS.size());
+            NetworkChaos.enable(AuditFaultProfile.create());
+            report.put("lossRate", AuditFaultProfile.CONTROLLED ? 0.0 : 0.15);
+            report.put("targetPositions", TARGETS.size());
             report.put("initialMaterialItems", 216); report.put("seed", 0x515549434B53484CL);
             advance(4);
             deadline = System.currentTimeMillis() + 90_000;
@@ -336,12 +338,17 @@ public final class PrinterAuditClient implements ClientModInitializer {
                 var serverLoss = (Map<?, ?>) report.get("dedicatedServerLoss");
                 var serverDirection = (Map<?, ?>) serverLoss.get("serverToClient");
                 long serverDropped = ((Number) serverDirection.get("dropped")).longValue();
-                check(serverDropped > 0 && loss.clientToServer().dropped() > 0,
-                        "Both directions must exercise genuine loss across TCP");
+                if (AuditFaultProfile.CONTROLLED)
+                    check(serverDropped == 0 && loss.clientToServer().dropped() == AuditFaultProfile.DROP_COUNT,
+                            "Controlled variant did not match selected C2S drop count or had S2C loss");
+                else check(serverDropped > 0 && loss.clientToServer().dropped() > 0,
+                            "Both directions must exercise genuine loss across TCP");
                 dropped += serverDropped;
             }
             report.put("totalDroppedPackets", dropped);
-            check(dropped >= 10, "Stress did not exercise meaningful real packet loss: " + dropped);
+            if (AuditFaultProfile.CONTROLLED)
+                check(dropped == AuditFaultProfile.DROP_COUNT, "Controlled diagnostic did not exercise the selected drop count");
+            else check(dropped >= 10, "Stress did not exercise meaningful real packet loss: " + dropped);
             check(directObserved, "Actual direct API path was never selected");
             check(!foreignContainer, "Direct transfer opened a foreign container");
             check(!QuickShulkerCompat.isBusy(), "Direct API remains busy after 800-tick window and upstream 160-tick drain");
@@ -412,7 +419,11 @@ public final class PrinterAuditClient implements ClientModInitializer {
         for (int i = 0; i < TARGETS.size(); i++) if (level.getBlockState(TARGETS.get(i)).is(expected(i))) count++;
         return count;
     }
-    private static Block expected(int index) { return MATERIALS.get(index % MATERIALS.size()); }
+    private static Block expected(int index) {
+        // Diagnostic layout keeps eight targets per material while making Z neighbors differ.
+        int rowShift = Boolean.getBoolean("printer.audit.rotatedMaterials") ? index / MATERIALS.size() : 0;
+        return MATERIALS.get((index + rowShift) % MATERIALS.size());
+    }
     private static List<BlockPos> targets() {
         List<BlockPos> result = new ArrayList<>();
         for (int z = 2; z <= 9; z++) for (int x = -8; x <= 9; x++) result.add(new BlockPos(x, 64, z));
@@ -461,6 +472,8 @@ public final class PrinterAuditClient implements ClientModInitializer {
         try { BedrockCompat.setWorking(false, false); BedrockCompat.clearTasks(); } catch (Throwable ignored) { }
         report.put("status", error == null ? "PASS" : "FAIL");
         if (error != null) { report.put("error", error.toString()); LOG.error("AUDIT_FAILED", error); }
+        try { AuditPacketTrace.dump(Path.of(System.getProperty("printer.audit.result")).getParent(), "client"); }
+        catch (Exception traceError) { LOG.error("Cannot save packet trace", traceError); }
         String json = new GsonBuilder().setPrettyPrinting().create().toJson(report);
         try { Files.writeString(Path.of(System.getProperty("printer.audit.result")), json); }
         catch (Exception writeError) { LOG.error("Cannot save audit report", writeError); }

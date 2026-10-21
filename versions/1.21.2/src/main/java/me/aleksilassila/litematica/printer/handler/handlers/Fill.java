@@ -3,6 +3,7 @@ package me.aleksilassila.litematica.printer.handler.handlers;
 import lombok.Getter;
 import me.aleksilassila.litematica.printer.I18n;
 import me.aleksilassila.litematica.printer.config.Configs;
+import me.aleksilassila.litematica.printer.enums.AreaSelectionType;
 import me.aleksilassila.litematica.printer.enums.FillBlockModeType;
 import me.aleksilassila.litematica.printer.enums.HighlightType;
 import me.aleksilassila.litematica.printer.handler.AsyncSearchCoordinator;
@@ -39,7 +40,9 @@ public class Fill extends Module {
     private final Map<Block, Boolean> replaceableMatchCache = new HashMap<>();
 
     public Fill() {
-        super(NAME, Configs.Fill.ENABLED, Configs.Fill.FILL_SELECTION_TYPE, true);
+        super(NAME, Configs.Fill.ENABLED,
+                () -> ((AreaSelectionType) Configs.Fill.FILL_SELECTION_TYPE.getOptionListValue()).heightFilter(),
+                true);
     }
 
     @Override
@@ -172,8 +175,8 @@ public class Fill extends Module {
             InventoryUtils.ItemSwitchResult switchResult =
                     InventoryUtils.switchToItemsResult(player, this.fillModeItemList);
             if (switchResult != InventoryUtils.ItemSwitchResult.READY) {
-                if (switchResult == InventoryUtils.ItemSwitchResult.WAITING) {
-                    enterWaiting(blockPos);
+                if (switchResult.isWaiting()) {
+                    enterWaiting(blockPos, switchResult.waitingReason());
                     skipIteration.set(true);
                     return;
                 }

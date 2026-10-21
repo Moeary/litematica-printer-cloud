@@ -75,6 +75,15 @@ public final class PrinterAuditServer implements net.fabricmc.api.ModInitializer
     private static final List<BlockPos> TARGETS = targets();
 
     private long lastRequest = 0;
+    public static String describeTarget(net.minecraft.world.level.Level level, BlockPos pos) {
+        int index = TARGETS.indexOf(pos);
+        if (index < 0) return "outside";
+        var actual = level.getBlockState(pos);
+        return pos.toShortString() + ":expected="
+                + net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(expected(index))
+                + ",actual=" + net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(actual.getBlock())
+                + ",wrong=" + (!actual.isAir() && !actual.is(expected(index)));
+    }
     @Override public void onInitialize() {
         net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.END_SERVER_TICK.register(this::tick);
     }
@@ -108,11 +117,12 @@ public final class PrinterAuditServer implements net.fabricmc.api.ModInitializer
                 player.inventoryMenu.sendAllDataToRemote();
  }
                     case "enableLoss" -> {
-                        LinkProfile loss = new LinkProfile(0.15, 0, 0, 0, 0, 0);
-                        NetworkChaos.enable(new ChaosConfig(loss, loss, 0x515549434B53484CL, true,
-                                ChaosConfig.ALL_PACKETS, ChaosConfig.NO_PACKETS));
+                        NetworkChaos.enable(AuditFaultProfile.create());
                     }
-                    case "stopLoss" -> { NetworkChaos.disable(); result.put("loss", NetworkChaos.stats()); }
+                    case "stopLoss" -> {
+                        NetworkChaos.disable(); result.put("loss", NetworkChaos.stats());
+                        AuditPacketTrace.dump(bridge.getParent(), "server");
+                    }
                     case "snapshot" -> {
                         var player = server.getPlayerList().getPlayers().getFirst();
                         int materialBlocks = 0;
@@ -168,7 +178,10 @@ public final class PrinterAuditServer implements net.fabricmc.api.ModInitializer
         for (int i = 0; i < TARGETS.size(); i++) if (level.getBlockState(TARGETS.get(i)).is(expected(i))) count++;
         return count;
     }
-    private static Block expected(int index) { return MATERIALS.get(index % MATERIALS.size()); }
+    private static Block expected(int index) {
+        int rowShift = Boolean.getBoolean("printer.audit.rotatedMaterials") ? index / MATERIALS.size() : 0;
+        return MATERIALS.get((index + rowShift) % MATERIALS.size());
+    }
     private static List<BlockPos> targets() {
         List<BlockPos> result = new ArrayList<>();
         for (int z = 2; z <= 9; z++) for (int x = -8; x <= 9; x++) result.add(new BlockPos(x, 64, z));

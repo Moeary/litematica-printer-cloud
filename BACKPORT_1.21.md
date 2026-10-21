@@ -2,12 +2,11 @@
 
 This owned branch keeps the mapped 1.21 builds separate from the unmapped 26.x
 main branch. The starting implementation is the existing 1.21.1 port (1.1.2).
-The current Minecraft 1.21.10 implementation includes the upstream 1.1.3 delta
+The Minecraft 1.21, 1.21.2 and 1.21.10 implementations include the upstream 1.1.3 delta
 at b096341a114d9ffc188b385cec970ec9dd15a3a3. API-specific adapters retain the
 mapped Minecraft/Litematica interfaces and Java 21.
 
-The active CI target is 1.21.10. Older 1.21 and 1.21.2 source remains from the
-previous 1.1.2 baseline and awaits the 1.1.3 update. Java 21 is required.
+The active CI targets are 1.21, 1.21.2 and 1.21.10. Java 21 is required.
 Example: `./gradlew -Ptargets=1.21.10 :core:test :1.21.10:remapJar`.
 The existing 1.21.1 source is retained for subsequent verification.
 
@@ -26,6 +25,10 @@ and provide `-PnetworkChaosJar=<absolute matching NetworkChaos JAR>`.
 The isolated production-client driver also exercises all seven upstream 4.1.2
 Chain AUTO-toggle transitions through the real Minecraft mouse handler, and
 three fill height filters with authoritative inventory/world assertions.
+All three clients additionally exercise the upstream 1.1.3 ice-to-water scenarios:
+solid/liquid/air support, repeated production at the same coordinate, and upward
+and downward bubble-column preservation and recreation. Authoritative server
+world state and survival ice counts are checked rather than client prediction.
 
 Stress variants record the same-position placement cooldown separately.
 An aggressive cooldown of zero has an unresolved wrong-block observation;
