@@ -1,91 +1,11 @@
-name: Publish verified mapped Printer 1.1.3
+name: Archived experimental mapped publisher (disabled)
 on:
-  push:
-    branches: ["dory/printer-1.1.3-1.21.x"]
-    paths: [".github/workflows/publish-mapped-1.1.3.yml"]
+  workflow_dispatch:
 permissions:
-  contents: write
-  actions: read
-concurrency:
-  group: publish-mapped-printer-1.1.3
-  cancel-in-progress: false
+  contents: read
 jobs:
-  publish:
+  archived:
+    if: ${{ false }}
     runs-on: ubuntu-latest
     steps:
-      - name: Verify pinned successful source run
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          python3 - <<'PY'
-          import json,os,urllib.request
-          base="https://api.github.com/repos/water2004/litematica-printer"
-          headers={"Authorization":"Bearer "+os.environ["GH_TOKEN"],"Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28"}
-          def api(path,data=None,method=None):
-              req=urllib.request.Request(base+path,data=None if data is None else json.dumps(data).encode(),headers=headers,method=method or ("GET" if data is None else "PATCH"))
-              with urllib.request.urlopen(req,timeout=90) as response:return json.load(response)
-          run=api("/actions/runs/39620484254")
-          assert run["head_sha"]=="d7491f54408fd042ee81bb7de005ca49b01de458"
-          assert run["status"]=="completed" and run["conclusion"]=="success"
-          PY
-      - uses: actions/download-artifact@v4
-        with:
-          github-token: ${{ github.token }}
-          run-id: 39620484254
-          pattern: litematica-printer-*-d7491f54408fd042ee81bb7de005ca49b01de458
-          merge-multiple: true
-          path: dist
-      - name: Verify every class and resource then append canonical assets
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          python3 - <<'PY'
-          import hashlib,json,os,urllib.request,urllib.parse,zipfile
-          from pathlib import Path
-          base="https://api.github.com/repos/water2004/litematica-printer"
-          headers={"Authorization":"Bearer "+os.environ["GH_TOKEN"],"Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28"}
-          def api(path,data=None,method=None):
-              req=urllib.request.Request(base+path,data=None if data is None else json.dumps(data).encode(),headers=headers,method=method or ("GET" if data is None else "PATCH"))
-              with urllib.request.urlopen(req,timeout=90) as response:return json.load(response)
-          def fingerprint(path):
-              with zipfile.ZipFile(path) as archive:
-                  rows=[]
-                  for name in sorted(n for n in archive.namelist() if not n.endswith("/")):
-                      data=archive.read(name)
-                      if name=="META-INF/MANIFEST.MF":
-                          data=("\n".join(sorted(line for line in data.decode().splitlines() if line))+"\n").encode()
-                      # Only these three text-resource line endings differ across platforms.
-                      if name in {"assets/litematica-printer/lang/en_us.json","assets/litematica-printer/lang/zh_cn.json","assets/litematica-printer/lang/zh_tw.json"}:
-                          data=data.replace(b"\r\n",b"\n")
-                      rows.append(name+"\0"+hashlib.sha256(data).hexdigest())
-                  return hashlib.sha256("\n".join(rows).encode()).hexdigest()
-          expected={"litematica-printer-1.1.3+1.21.jar":"ff877ba6d5dadae5312004b71b47925b3092f26bcfa178a23da71182286c8a50","litematica-printer-1.1.3+1.21.2.jar":"090cf0e12e8db9cd62d37dafe2951ade76d45e3a947ceab1af200a447f868690","litematica-printer-1.1.3+1.21.10.jar":"c0119d81cba7f33dfd1954c048349921cf603ba55938cd58f2b86af21feed95e"}
-          paths={}
-          for name,digest in expected.items():
-              matches=list(Path("dist").rglob(name))
-              assert len(matches)==1,(name,matches)
-              path=matches[0]
-              assert fingerprint(path)==digest, "Published content differs from locally exercised production: "+name
-              paths[name]=path
-          release=api("/releases/417572852")
-          assert release["tag_name"]=="v1.1.3" and not release["draft"]
-          existing={a["name"]:a for a in release["assets"]}
-          for name,path in paths.items():
-              data=path.read_bytes()
-              digest="sha256:"+hashlib.sha256(data).hexdigest()
-              if name in existing:
-                  assert existing[name].get("digest")==digest, "Existing asset differs; no overwrite permitted"
-                  continue
-              url=release["upload_url"].split("{",1)[0]+"?"+urllib.parse.urlencode({"name":name})
-              upload_headers={**headers,"Content-Type":"application/java-archive"}
-              request=urllib.request.Request(url,data=data,headers=upload_headers,method="POST")
-              with urllib.request.urlopen(request,timeout=120) as response:asset=json.load(response)
-              assert asset["name"]==name and asset.get("digest")==digest
-              print(asset["browser_download_url"])
-          release=api("/releases/417572852")
-          marker="<!-- mapped-printer-1.1.3 -->"
-          body=release.get("body") or ""
-          note="## Minecraft 1.21 mapped builds\n\n- Added Fabric / Java 21 builds for Minecraft 1.21, 1.21.2 and 1.21.10.\n- Downloads: `litematica-printer-1.1.3+1.21.jar`, `litematica-printer-1.1.3+1.21.2.jar`, `litematica-printer-1.1.3+1.21.10.jar`.\n- These builds contain the upstream 1.1.3 behavior, including ice-to-water fixes, repeated same-position production, bubble-column preservation and area height filters.\n- In these mapped builds, Servux hand confirmation also uses server block updates instead of local placement prediction. This fixes the reproduced case where lost placement packets left phantom support blocks despite correct held-item confirmation.\n- Validation includes real production clients, real Quick Shulker v3/v4, optional ChainVein behavior, two released bedrock miners, and 15% loss in both directions against a dedicated server with real Servux. The controlled eight-placement-drop regression changed from two wrong blocks to all 144 correct blocks.\n- The loss checks require zero wrong blocks with Servux enabled and no persistent Direct API busy state. They do not assert full convergence under random loss. Historical failing runs are retained separately from the corrected results.\n\nSource: [mapped 1.1.3 source](https://github.com/water2004/litematica-printer/tree/d7491f54408fd042ee81bb7de005ca49b01de458). [Build and core tests](https://github.com/water2004/litematica-printer/actions/runs/39620484254).\n"
-          if marker not in body:
-              api("/releases/417572852",{"body":body.rstrip()+"\n\n"+marker+"\n"+note})
-          PY
+      - run: echo "Experimental behavior stays on the candidate branch."

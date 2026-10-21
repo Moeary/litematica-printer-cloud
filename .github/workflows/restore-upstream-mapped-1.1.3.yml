@@ -1,0 +1,120 @@
+name: Restore verified upstream-behavior mapped 1.1.3 assets
+on:
+  push:
+    branches: ["dory/printer-1.1.3-1.21.x"]
+    paths: [".github/workflows/restore-upstream-mapped-1.1.3.yml"]
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: publish-mapped-printer-1.1.3
+  cancel-in-progress: false
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify original upstream-behavior source build
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 - <<'PY'
+          import json,os,urllib.request
+          base="https://api.github.com/repos/water2004/litematica-printer"
+          headers={"Authorization":"Bearer "+os.environ["GH_TOKEN"],"Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28"}
+          def api(path,data=None,method=None):
+              request=urllib.request.Request(base+path,data=None if data is None else json.dumps(data).encode(),headers=headers,method=method or ("GET" if data is None else "PATCH"))
+              with urllib.request.urlopen(request,timeout=120) as response:
+                  payload=response.read()
+                  return json.loads(payload) if payload else None
+          run=api("/actions/runs/39617655661")
+          assert run["head_sha"]=="c4183893ede1c66cfbce7bd1f286b89cedb8189b" and run["conclusion"]=="success"
+          PY
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 39617655661
+          pattern: litematica-printer-*-c4183893ede1c66cfbce7bd1f286b89cedb8189b
+          merge-multiple: true
+          path: dist
+      - name: Stage verified upstream artifacts and replace only our three candidate assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 - <<'PY'
+          import hashlib,json,os,urllib.request,urllib.parse,zipfile
+          from pathlib import Path
+          base="https://api.github.com/repos/water2004/litematica-printer"
+          headers={"Authorization":"Bearer "+os.environ["GH_TOKEN"],"Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28"}
+          def api(path,data=None,method=None):
+              request=urllib.request.Request(base+path,data=None if data is None else json.dumps(data).encode(),headers=headers,method=method or ("GET" if data is None else "PATCH"))
+              with urllib.request.urlopen(request,timeout=120) as response:
+                  payload=response.read()
+                  return json.loads(payload) if payload else None
+          def fingerprint(path):
+              with zipfile.ZipFile(path) as archive:
+                  rows=[]
+                  for name in sorted(n for n in archive.namelist() if not n.endswith("/")):
+                      data=archive.read(name)
+                      if name=="META-INF/MANIFEST.MF":
+                          data=("\n".join(sorted(line for line in data.decode().splitlines() if line))+"\n").encode()
+                      rows.append(name+"\0"+hashlib.sha256(data).hexdigest())
+                  return hashlib.sha256("\n".join(rows).encode()).hexdigest()
+          expected={"litematica-printer-1.1.3+1.21.jar":"be840e73976c48421b49ebbb7588c2ebffdff090d5e4648351bef437795f7967","litematica-printer-1.1.3+1.21.2.jar":"e4fa884d13c302a23ce35d606547b6f8f39f2b4920fa9b8a9f96151bef1a4c56","litematica-printer-1.1.3+1.21.10.jar":"ac0e972b7512bcb18b3c9a62529ede550dcbb37ce0f908ee376f6f1b160cb15a"}
+          previous={"litematica-printer-1.1.3+1.21.10.jar":{"id":662858318,"digest":"sha256:945a6d67c92cb331b0e1201345faaed30fe50e6cec71260f52bb82287603fdea"},"litematica-printer-1.1.3+1.21.2.jar":{"id":662858276,"digest":"sha256:384ac1170e00ba84247b9801458a45bf33b3c4ab1f94063ff460323598be90ef"},"litematica-printer-1.1.3+1.21.jar":{"id":662858216,"digest":"sha256:243e6bf3ae833ffe01bbd062c277f3c58c7fc317f58b161e53e7166633a1af1b"}}
+          paths={}
+          for name,digest in expected.items():
+              matches=list(Path("dist").rglob(name))
+              assert len(matches)==1
+              path=matches[0]
+              assert fingerprint(path)==digest,"Upstream artifact differs from the tested pre-experiment implementation"
+              paths[name]=path
+          release=api("/releases/417572852")
+          assert release["tag_name"]=="v1.1.3"
+          staged={}
+          for name,path in paths.items():
+              assets={a["name"]:a for a in api("/releases/417572852")["assets"]}
+              data=path.read_bytes()
+              digest="sha256:"+hashlib.sha256(data).hexdigest()
+              current=assets.get(name)
+              retired=assets.get(name+".superseded-extra-fix")
+              if current and current.get("digest")==digest:
+                  staged[name]=(current,digest,True)
+                  continue
+              prior=current or retired
+              assert prior and prior["id"]==previous[name]["id"] and prior.get("digest")==previous[name]["digest"],"Unexpected existing artifact; refusing replacement"
+              temporary=name+".restore-staged"
+              stage=assets.get(temporary)
+              if stage:
+                  assert stage.get("digest")==digest
+              else:
+                  url="https://uploads.github.com/repos/water2004/litematica-printer/releases/417572852/assets?"+urllib.parse.urlencode({"name":temporary})
+                  request=urllib.request.Request(url,data=data,headers={**headers,"Content-Type":"application/java-archive"},method="POST")
+                  with urllib.request.urlopen(request,timeout=120) as response:stage=json.load(response)
+                  assert stage.get("digest")==digest
+              staged[name]=(stage,digest,False)
+          for name,(stage,digest,complete) in staged.items():
+              assets={a["name"]:a for a in api("/releases/417572852")["assets"]}
+              if complete:
+                  retired=assets.get(name+".superseded-extra-fix")
+                  if retired:
+                      assert retired["id"]==previous[name]["id"] and retired.get("digest")==previous[name]["digest"]
+                      api("/releases/assets/"+str(retired["id"]),method="DELETE")
+                  continue
+              old=assets.get(name)
+              if old:
+                  assert old["id"]==previous[name]["id"] and old.get("digest")==previous[name]["digest"]
+                  api("/releases/assets/"+str(old["id"]),{"name":name+".superseded-extra-fix"})
+              restored=api("/releases/assets/"+str(stage["id"]),{"name":name})
+              assert restored["name"]==name and restored.get("digest")==digest
+              retired=api("/releases/assets/"+str(previous[name]["id"]))
+              assert retired["name"]==name+".superseded-extra-fix" and retired.get("digest")==previous[name]["digest"]
+              api("/releases/assets/"+str(retired["id"]),method="DELETE")
+              print(restored["browser_download_url"])
+          release=api("/releases/417572852")
+          body=release.get("body") or ""
+          old_note="## Minecraft 1.21 mapped builds\n\n- Added Fabric / Java 21 builds for Minecraft 1.21, 1.21.2 and 1.21.10.\n- Downloads: `litematica-printer-1.1.3+1.21.jar`, `litematica-printer-1.1.3+1.21.2.jar`, `litematica-printer-1.1.3+1.21.10.jar`.\n- These builds contain the upstream 1.1.3 behavior, including ice-to-water fixes, repeated same-position production, bubble-column preservation and area height filters.\n- In these mapped builds, Servux hand confirmation also uses server block updates instead of local placement prediction. This fixes the reproduced case where lost placement packets left phantom support blocks despite correct held-item confirmation.\n- Validation includes real production clients, real Quick Shulker v3/v4, optional ChainVein behavior, two released bedrock miners, and 15% loss in both directions against a dedicated server with real Servux. The controlled eight-placement-drop regression changed from two wrong blocks to all 144 correct blocks.\n- The loss checks require zero wrong blocks with Servux enabled and no persistent Direct API busy state. They do not assert full convergence under random loss. Historical failing runs are retained separately from the corrected results.\n\nSource: [mapped 1.1.3 source](https://github.com/water2004/litematica-printer/tree/d7491f54408fd042ee81bb7de005ca49b01de458). [Build and core tests](https://github.com/water2004/litematica-printer/actions/runs/39620484254).\n"
+          new_note="## Minecraft 1.21 mapped builds\n\n- Fabric / Java 21 builds: `litematica-printer-1.1.3+1.21.jar`, `litematica-printer-1.1.3+1.21.2.jar`, `litematica-printer-1.1.3+1.21.10.jar`.\n- These builds preserve upstream 1.1.3 placement behavior, including the saved local-prediction / packet-placement setting. An experimental automatic prediction change is not included.\n- Mapped API adapters include the upstream 1.1.3 ice-to-water and repeated-coordinate fixes, source bubble-column preservation and height-filter options.\n- Validation covers native production clients, real Quick Shulker v3/v4, optional ChainVein, two released bedrock miners and real Servux on a dedicated server with 15% bidirectional loss.\n- Known limitation: an unchanged-upstream Minecraft 1.21.10 default-cooldown stress run recorded two wrong server blocks despite correct held-item confirmation. A controlled dropped-placement regression also reproduces phantom support blocks. This remains under investigation; the experimental behavioral change is retained separately and is not shipped here. Passing later or different-parameter runs do not erase the failing record.\n- The 1.21 and 1.21.2 specified loss cases passed; the tests do not require full convergence under random loss.\n\nSource implementation: [mapped upstream 1.1.3](https://github.com/water2004/litematica-printer/tree/c4183893ede1c66cfbce7bd1f286b89cedb8189b). [Build and core tests](https://github.com/water2004/litematica-printer/actions/runs/39617655661).\n"
+          if old_note in body:body=body.replace(old_note,new_note,1)
+          elif new_note not in body:raise AssertionError("Release notes changed externally; inspect before editing")
+          api("/releases/417572852",{"body":body})
+          PY
