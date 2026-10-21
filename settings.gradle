@@ -1,23 +1,9 @@
 pluginManagement {
-    repositories {
-        mavenCentral()
-        gradlePluginPortal()
-        maven {
-            name = 'Fabric'
-            url = 'https://maven.fabricmc.net'
-        }
-    }
+    repositories { maven { url = 'https://maven.fabricmc.net' }; gradlePluginPortal(); mavenCentral() }
 }
-
-['26.1.2', '26.2', '26.3'].each { version ->
-    include(":${version}")
-    project(":${version}").with {
-        projectDir = file("versions/${version}")
-        buildFileName = '../../build.fabric.gradle'
-    }
+def targets = providers.gradleProperty('targets').orElse('1.21.10').get().split(',')
+targets.each { mc ->
+    include(":${mc}")
+    project(":${mc}").projectDir = file("versions/${mc}")
 }
-
-include ':1.21.1'
-project(':1.21.1').projectDir = file('versions/1.21.1')
-
 include ':core'
