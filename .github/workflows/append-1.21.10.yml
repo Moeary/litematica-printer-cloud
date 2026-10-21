@@ -1,0 +1,41 @@
+name: Append verified Minecraft 1.21.10 asset
+on:
+  push:
+    branches: ["dory/1.21.x"]
+    paths: [".github/workflows/append-1.21.10.yml"]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  append:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/dory/1.21.x'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - name: Verify pinned successful test run
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh api repos/${{ github.repository }}/actions/runs/39586214166 > /tmp/verified-run.json
+          jq -e '.conclusion == "success" and .head_sha == "51f93e880da54eeeaf32e6f75d67b8e05f790e14"' /tmp/verified-run.json
+          gh release view 'v1.1.2' --repo '${{ github.repository }}'
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 39586214166
+          name: litematica-printer-1.21.10-51f93e880da54eeeaf32e6f75d67b8e05f790e14
+          path: release
+      - name: Append only the expected production asset
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$(find release -type f | wc -l)" -eq 1
+          test -f 'release/litematica-printer-1.1.2-backport.1+1.21.10.jar'
+          sha256sum 'release/litematica-printer-1.1.2-backport.1+1.21.10.jar'
+          # No clobber: preserve every existing release asset and its metadata.
+          gh release upload 'v1.1.2' 'release/litematica-printer-1.1.2-backport.1+1.21.10.jar' --repo '${{ github.repository }}'
+
