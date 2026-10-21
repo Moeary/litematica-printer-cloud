@@ -92,7 +92,9 @@ public class ActionManager {
         }
         MultiPlayerGameModeExtension gameModeExtension = (MultiPlayerGameModeExtension) Reference.MINECRAFT.gameMode;
         if (gameModeExtension != null) {
-            boolean localPrediction = !Configs.Placement.PRINT_USE_PACKET.getBooleanValue();
+            // Authoritative hand mode also needs server-updated placement anchors.
+            boolean localPrediction = !Configs.Placement.PRINT_USE_PACKET.getBooleanValue()
+                    && !Configs.Print.SERVUX_HAND_CONFIRMATION.getBooleanValue();
             BlockHitResult blockHitResult = new BlockHitResult(hitVec, side, target, false);
             gameModeExtension.litematica_printer$useItemOn(
                     localPrediction, InteractionHand.MAIN_HAND, blockHitResult);

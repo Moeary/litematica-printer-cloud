@@ -2,25 +2,27 @@ package me.aleksilassila.litematica.printer.audit.mixin;
 
 import me.aleksilassila.litematica.printer.audit.AuditPacketTrace;
 import me.aleksilassila.litematica.printer.audit.PrinterAuditServer;
-import net.minecraft.client.multiplayer.MultiPlayerGameMode;
+import me.aleksilassila.litematica.printer.printer.ActionManager;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.phys.BlockHitResult;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(MultiPlayerGameMode.class)
+@Mixin(value = ActionManager.class, remap = false)
 public class AuditClientUseMixin {
-    @Inject(method = "useItemOn", at = @At("HEAD"))
-    private void observeLocalWorld(LocalPlayer player, InteractionHand hand, BlockHitResult hit,
-            CallbackInfoReturnable<InteractionResult> result) {
-        if (!AuditPacketTrace.ENABLED) return;
+    @Shadow public BlockPos target;
+    @Shadow public Direction side;
+    @Inject(method = "sendQueue", at = @At("HEAD"))
+    private void observeLocalWorld(LocalPlayer player, CallbackInfoReturnable<ActionManager> result) {
+        if (!AuditPacketTrace.ENABLED || target == null || side == null) return;
         AuditPacketTrace.log("CLIENT_USE", AuditPacketTrace.hand(player)
-                + " hit=" + hit.getBlockPos().toShortString() + " face=" + hit.getDirection()
-                + " clicked=" + PrinterAuditServer.describeTarget(player.level(), hit.getBlockPos())
-                + " adjacent=" + PrinterAuditServer.describeTarget(player.level(), hit.getBlockPos().relative(hit.getDirection())));
+                + " hit=" + target.toShortString() + " face=" + side
+                + " clicked=" + PrinterAuditServer.describeTarget(player.level(), target)
+                + " adjacent=" + PrinterAuditServer.describeTarget(player.level(), target.relative(side)));
     }
 }

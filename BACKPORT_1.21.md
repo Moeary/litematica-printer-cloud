@@ -31,8 +31,14 @@ and downward bubble-column preservation and recreation. Authoritative server
 world state and survival ice counts are checked rather than client prediction.
 
 Stress variants record the same-position placement cooldown separately.
-An aggressive cooldown of zero has an unresolved wrong-block observation;
-do not interpret a successful cooldown-three run as a zero-cooldown pass.
+A controlled regression drops the first eight placement packets while keeping
+all hand-switch packets. It exposed two wrong blocks caused by locally predicted
+support blocks, despite matching client/server held items. Authoritative hand
+mode now also uses the existing non-predicted placement path: placement anchors
+come from server block updates. The same controlled case then reaches all 144
+correct blocks with zero wrong blocks. Earlier failed runs remain local evidence;
+this addresses that specific reproduction rather than claiming a general fix
+for every packet-loss scenario.
 
 The GitHub workflow checks mapped compilation and core unit tests. It does not
 claim that those checks rerun all local GUI/gameplay scenarios. It does not
