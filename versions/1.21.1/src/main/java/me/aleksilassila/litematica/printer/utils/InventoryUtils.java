@@ -13,6 +13,7 @@ import lombok.Setter;
 import me.aleksilassila.litematica.printer.config.Configs;
 import me.aleksilassila.litematica.printer.core.network.HandConfirmationGate;
 import me.aleksilassila.litematica.printer.interfaces.compat.QuickShulkerCompat;
+import me.aleksilassila.litematica.printer.core.status.PrinterWaitReason;
 import me.aleksilassila.litematica.printer.mixin.printer.litematica.EasyPlaceUtilsAccessor;
 import me.aleksilassila.litematica.printer.mixin.printer.litematica.InventoryUtilsAccessor;
 import net.minecraft.client.Minecraft;
@@ -44,13 +45,26 @@ public class InventoryUtils {
 
     /**
      * Result of preparing the main hand for a print action.
-     * WAITING means either a hand switch was issued or an asynchronous item request
-     * is in progress; callers that own a block job must retain it and retry later.
+     * Waiting results retain the block job for a later tick and carry the reason
+     * so the HUD can distinguish item preparation from a Servux response.
      */
     public enum ItemSwitchResult {
         READY,
         WAITING,
-        UNAVAILABLE
+        WAITING_FOR_CONFIRMATION,
+        UNAVAILABLE;
+
+        public boolean isWaiting() {
+            return this == WAITING || this == WAITING_FOR_CONFIRMATION;
+        }
+
+        public PrinterWaitReason waitingReason() {
+            return switch (this) {
+                case WAITING -> PrinterWaitReason.ITEM_SWITCH;
+                case WAITING_FOR_CONFIRMATION -> PrinterWaitReason.SERVUX_HAND_CONFIRMATION;
+                default -> throw new IllegalStateException("Result is not waiting: " + this);
+            };
+        }
     }
 
 
@@ -363,10 +377,10 @@ public class InventoryUtils {
                         ServuxHandItemConfirmation.verify(player, items);
                 if (confirmation == HandConfirmationGate.Status.MISMATCH) {
                     ServuxHandItemConfirmation.retrySwitch(player);
-                    return ItemSwitchResult.WAITING;
+                    return ItemSwitchResult.WAITING_FOR_CONFIRMATION;
                 }
                 if (confirmation != HandConfirmationGate.Status.CONFIRMED) {
-                    return ItemSwitchResult.WAITING;
+                    return ItemSwitchResult.WAITING_FOR_CONFIRMATION;
                 }
                 return ItemSwitchResult.READY;
             }

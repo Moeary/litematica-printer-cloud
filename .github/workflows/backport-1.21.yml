@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        minecraft: ["1.21", "1.21.2", "1.21.10"]
+        minecraft: ["1.21", "1.21.1", "1.21.2", "1.21.3", "1.21.4"]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4

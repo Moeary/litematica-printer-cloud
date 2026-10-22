@@ -1,12 +1,12 @@
 package me.aleksilassila.litematica.printer.handler;
 
 import fi.dy.masa.malilib.config.options.ConfigBoolean;
-import fi.dy.masa.malilib.config.options.ConfigOptionList;
 import fi.dy.masa.litematica.world.SchematicWorldHandler;
 import fi.dy.masa.litematica.world.WorldSchematic;
 import lombok.Getter;
 import me.aleksilassila.litematica.printer.config.Configs;
 import me.aleksilassila.litematica.printer.core.job.JobPool;
+import me.aleksilassila.litematica.printer.core.spatial.PlayerHeightFilter;
 import me.aleksilassila.litematica.printer.core.status.PrinterWaitReason;
 import me.aleksilassila.litematica.printer.enums.*;
 import me.aleksilassila.litematica.printer.printer.*;
@@ -29,6 +29,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executors;
@@ -37,6 +38,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 
 public abstract class Module extends ConfigUtils {
     private static final ScheduledExecutorService TIMEOUT_SCHEDULER =
@@ -56,9 +58,8 @@ public abstract class Module extends ConfigUtils {
     @Getter
     @Nullable
     private final ConfigBoolean enableConfig;
-    @Getter
-    @Nullable
-    private final ConfigOptionList selectionType;
+    // Read on each search preparation so changing a dropdown takes effect immediately.
+    private final Supplier<PlayerHeightFilter> heightFilter;
     private final AtomicReference<Boolean> skipIteration = new AtomicReference<>(false);
     private final AtomicBoolean timeLimitExceeded = new AtomicBoolean(false);
     @Getter
@@ -96,10 +97,12 @@ public abstract class Module extends ConfigUtils {
     private volatile boolean searchPrepared = false;
     private long moduleGeneration = 0L;
 
-    protected Module(String id, @Nullable ConfigBoolean enableConfig, @Nullable ConfigOptionList selectionType, boolean useBox) {
+    protected Module(
+            String id, @Nullable ConfigBoolean enableConfig,
+            Supplier<PlayerHeightFilter> heightFilter, boolean useBox) {
         this.id = id;
         this.enableConfig = enableConfig;
-        this.selectionType = selectionType;
+        this.heightFilter = Objects.requireNonNull(heightFilter, "heightFilter");
         this.box = useBox ? new AtomicReference<>() : null;
         updateVariables();
     }
@@ -139,7 +142,7 @@ public abstract class Module extends ConfigUtils {
         }
 
         if (box == null) return;
-        if (iteratorManager.tryBuildBox(player, selectionType != null ? selectionType.getOptionListValue() : null)) {
+        if (iteratorManager.tryBuildBox(player, heightFilter.get())) {
             box.set(iteratorManager.getBox());
             // 玩家移动只替换下一轮扫描描述；旧快照结果可安全发布，
             // 消费者会按最新范围与世界状态惰性丢弃。

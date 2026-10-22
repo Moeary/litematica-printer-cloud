@@ -35,7 +35,7 @@
     "litematica": ">=${litematica}",
     "fabricloader": ">=0.19.3",
     "java": ">=21",
-    "fabric-api": ">=0.116.17+1.21.1"
+    "fabric-api": "*"
   },
   "suggests": {
     "chainveinfabric": ">=3.0.0"

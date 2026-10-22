@@ -49,6 +49,10 @@ public abstract class MixinConfigBase<T extends IConfigBase> implements IConfigB
 
     @Inject(method = "getComment", at = @At("HEAD"), cancellable = true)
     public void litematica_printer$getComment(CallbackInfoReturnable<String> cir) {
+        if ("".equals(litematica_printer$translateCommentKey)) {
+            cir.setReturnValue(null);
+            return;
+        }
         @Nullable String comment = null;
         if (litematica_printer$translateCommentKey != null && !litematica_printer$translateCommentKey.isEmpty()) {
             comment = StringUtils.getTranslatedOrFallback(litematica_printer$translateCommentKey, null);
