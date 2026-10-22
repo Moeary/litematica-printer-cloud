@@ -45,6 +45,10 @@ if fingerprint != config['fingerprint']:
     print('VERIFY_ENTRIES ' + json.dumps(entry_hashes, sort_keys=True), flush=True)
     raise AssertionError('Built classes/resources differ from the locally tested build: ' + fingerprint)
 assert classes == config['classes']
+if os.environ.get('VERIFIED_ASSET_CHECK_ONLY') == '1':
+    print(json.dumps({'status':'PASS','scope':'class/resource fingerprint','name':config['name'],
+                      'classes':classes,'fingerprint':fingerprint}))
+    raise SystemExit(0)
 release_path = 'releases/' + str(config['release'])
 release = api(release_path)
 preserved = {a['id']:(a['name'],a.get('digest')) for a in release['assets']}
