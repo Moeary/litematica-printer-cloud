@@ -21,9 +21,10 @@ The standalone audit drivers are separate artifacts, never included in the
 production JAR. To build them, request `remapAuditJar` / `remapAuditServerJar`
 and provide `-PnetworkChaosJar=<absolute matching NetworkChaos JAR>`.
 
-The isolated production-client driver also exercises all seven upstream 4.1.2
-Chain AUTO-toggle transitions through the real Minecraft mouse handler, and
-three fill height filters with authoritative inventory/world assertions.
+The Minecraft 1.21.10 production-client driver also exercises all seven upstream
+4.1.2 Chain AUTO-toggle transitions through the real Minecraft mouse handler.
+Mapped client fixtures check three fill height filters with authoritative
+inventory/world assertions.
 All three clients additionally exercise the upstream 1.1.3 ice-to-water scenarios:
 solid/liquid/air support, repeated production at the same coordinate, and upward
 and downward bubble-column preservation and recreation. Authoritative server

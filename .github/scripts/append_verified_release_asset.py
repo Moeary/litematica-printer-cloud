@@ -63,7 +63,7 @@ else:
 assert asset.get('digest') == 'sha256:' + digest, 'Uploaded asset digest mismatch'
 marker = '<!-- dory-verified-' + config['minecraft'] + ' -->'
 ending = '<!-- /dory-verified-' + config['minecraft'] + ' -->'
-body = release.get('body') or ''
+body = api(release_path).get('body') or ''
 section = marker + '\n' + config['notes'].strip() + '\n' + ending
 if marker in body:
     start = body.index(marker)
