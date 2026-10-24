@@ -78,6 +78,13 @@ for profile in ('minimum','current'):
     destination.parent.mkdir(exist_ok=True,parents=True)
     shutil.move(source,destination)
     (destination/'dependency-profile.json').write_text(json.dumps({'profile':profile,'expectedLoader':expected_loader,'inputs':inputs[mc]},indent=2),encoding='utf-8')
+    # Retain the exact production build exercised with this dependency profile.
+    jars=[p for p in (ROOT/'versions'/mc/'build/libs').glob('*.jar')
+          if not any(x in p.name for x in ('-sources','-dev','-smoke-','-audit-'))]
+    assert len(jars)==1,jars
+    production=destination/'production'
+    production.mkdir()
+    shutil.copy2(jars[0],production/jars[0].name)
 (ROOT/'.ci/minimum-results'/mc/'summary.json').write_text(json.dumps({'status':'FAIL' if failures else 'PASS','failures':failures},indent=2),encoding='utf-8')
 if failures:
     print('MINIMUM_AND_CURRENT_FAIL',mc,json.dumps(failures),flush=True)

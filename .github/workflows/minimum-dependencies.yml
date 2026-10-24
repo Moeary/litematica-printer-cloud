@@ -54,3 +54,34 @@ jobs:
             versions/${{ matrix.minecraft }}/build/libs/*.jar
           if-no-files-found: error
           include-hidden-files: true
+      - name: Collect the tested 1.1.4 release candidate
+        run: python .github/scripts/collect-release-1.1.4.py '${{ matrix.minecraft }}'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-1.1.4-${{ matrix.minecraft }}-${{ github.sha }}
+          path: .ci/release-candidate/${{ matrix.minecraft }}/
+          if-no-files-found: error
+  publish-1-1-4:
+    needs: compatibility
+    if: github.event_name == 'push' && github.ref == 'refs/heads/dory/minimum-dependencies-1.21.x' && contains(github.event.head_commit.message, '[release-1.1.4]')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: release-1.1.4-*-${{ github.sha }}
+          path: release-candidates
+      - name: Publish new 1.1.4 release and preserve all earlier releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python .github/scripts/publish-release-1.1.4.py
+      - name: Retain release and preservation verification
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-1.1.4-verification-${{ github.sha }}
+          path: .ci/release-1.1.4/
+          if-no-files-found: error
