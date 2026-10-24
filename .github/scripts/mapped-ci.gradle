@@ -23,9 +23,10 @@ gradle.afterProject { p, state ->
         '-Dprinter.audit.dedicated=' + (kind == 'stress'),
         '-Dprinter.audit.address=127.0.0.1:25587' ]
     p.tasks.register('runMappedClientCI', clientTaskType) {
+        doNotTrackState('Integration clients must execute against fresh mutable game worlds')
         dependsOn p.tasks.named('remapJar'), p.tasks.named(kind == 'smoke' ? 'remapSmokeJar' : 'remapAuditJar')
         mods.setFrom(p.tasks.named('remapJar'), p.tasks.named(kind == 'smoke' ? 'remapSmokeJar' : 'remapAuditJar'), p.fileTree(inputs) { include '*.jar' })
-        runDir = directory
+        runDir = new File(directory, 'client')
         jvmArgs.addAll(common)
         if (kind == 'smoke') {
             def required = mode == 'nochain' ? 'quickshulker' : 'chainveinfabric,quickshulker'
@@ -36,12 +37,14 @@ gradle.afterProject { p, state ->
             '--uuid', '00000000000000000000000000000001', '--width', '960', '--height', '540'])
         doFirst {
             directory.mkdirs()
+            runDir.get().asFile.mkdirs()
             result.delete()
-            new File(directory, 'options.txt').text = 'soundCategory_master:0.0\nmaxFps:60\nenableVsync:false\nrenderDistance:3\nsimulationDistance:5\n'
+            new File(runDir.get().asFile, 'options.txt').text = 'soundCategory_master:0.0\nmaxFps:60\nenableVsync:false\nrenderDistance:3\nsimulationDistance:5\n'
         }
     }
     if (kind == 'stress') {
         p.tasks.register('runMappedServerCI', serverTaskType) {
+            doNotTrackState('Dedicated integration servers must execute against mutable game worlds')
             dependsOn p.tasks.named('remapAuditServerJar')
             installerVersion = '1.0.1'
             mods.setFrom(p.tasks.named('remapAuditServerJar'), p.fileTree(new File(inputs, 'server')) { include '*.jar' })

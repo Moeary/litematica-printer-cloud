@@ -81,23 +81,23 @@ def run(kind, scenario, mode='full', miner='none', servux=False):
     directory = output / scenario
     server = None
     server_log = None
-    if kind == 'stress':
-        bridge = directory / 'bridge'
-        bridge.mkdir(exist_ok=True)
-        for path in bridge.glob('*'):
-            if path.is_file():
-                path.unlink()
-        server_log = (directory / 'server-console.log').open('w', encoding='utf-8')
-        server = subprocess.Popen(command(kind, scenario, servux=servux, task='runMappedServerCI'),
-                                  cwd=ROOT, stdout=server_log, stderr=subprocess.STDOUT)
-        deadline = time.monotonic() + 360
-        while 'Done (' not in (directory / 'server-console.log').read_text(encoding='utf-8', errors='replace'):
-            if server.poll() is not None or time.monotonic() > deadline:
-                if server.poll() is None:
-                    server.terminate()
-                raise RuntimeError('Dedicated production server did not start: ' + scenario)
-            time.sleep(1)
     try:
+        if kind == 'stress':
+            bridge = directory / 'bridge'
+            bridge.mkdir(exist_ok=True)
+            for path in bridge.glob('*'):
+                if path.is_file():
+                    path.unlink()
+            server_log = (directory / 'server-console.log').open('w', encoding='utf-8')
+            server = subprocess.Popen(command(kind, scenario, servux=servux, task='runMappedServerCI'),
+                                      cwd=ROOT, stdout=server_log, stderr=subprocess.STDOUT)
+            deadline = time.monotonic() + 360
+            while 'Done (' not in (directory / 'server-console.log').read_text(encoding='utf-8', errors='replace'):
+                if server.poll() is not None or time.monotonic() > deadline:
+                    if server.poll() is None:
+                        server.terminate()
+                    raise RuntimeError('Dedicated production server did not start: ' + scenario)
+                time.sleep(1)
         with (directory / 'console.log').open('w', encoding='utf-8') as log:
             completed = subprocess.run(command(kind, scenario, mode, miner, servux), cwd=ROOT,
                                        stdout=log, stderr=subprocess.STDOUT, timeout=600)

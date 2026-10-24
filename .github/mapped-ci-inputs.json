@@ -329,7 +329,7 @@
       },
       "blockminer": {
         "name": "blockminer-v1.1.1-mc1.21.4.jar",
-        "url": "https://github.com/z7087/blockminer/releases/download/prerelease/blockminer-v1.1.1-mc1.21.4.jar",
+        "url": "https://github.com/z7087/blockminer/releases/download/1.1.1/blockminer-v1.1.1-mc1.21.4.jar",
         "sha256": "de13ba2cbd53a94c03dc56e2cd4d79a7ff4b02294eaea4abe3de8b8447a33423"
       }
     }
@@ -396,7 +396,7 @@
       },
       "blockminer": {
         "name": "blockminer-v1.1.1-mc1.21.5.jar",
-        "url": "https://github.com/z7087/blockminer/releases/download/prerelease/blockminer-v1.1.1-mc1.21.5.jar",
+        "url": "https://github.com/z7087/blockminer/releases/download/1.1.1/blockminer-v1.1.1-mc1.21.5.jar",
         "sha256": "c88cf632c5473313202235d3fae16abe74561fd70932245b9708a6bc8edf7c0b"
       }
     }
@@ -463,7 +463,7 @@
       },
       "blockminer": {
         "name": "blockminer-v1.1.1-mc1.21.6.jar",
-        "url": "https://github.com/z7087/blockminer/releases/download/prerelease/blockminer-v1.1.1-mc1.21.6.jar",
+        "url": "https://github.com/z7087/blockminer/releases/download/1.1.1/blockminer-v1.1.1-mc1.21.6.jar",
         "sha256": "07b32d5b19167d8f23eff22b93b99d0681fc32900c2c6fe6a6dde18c517cb3ae"
       }
     }
@@ -530,7 +530,7 @@
       },
       "blockminer": {
         "name": "blockminer-v1.1.1-mc1.21.8.jar",
-        "url": "https://github.com/z7087/blockminer/releases/download/prerelease/blockminer-v1.1.1-mc1.21.8.jar",
+        "url": "https://github.com/z7087/blockminer/releases/download/1.1.1/blockminer-v1.1.1-mc1.21.8.jar",
         "sha256": "031489347d2f79ecbe14c6802ef4bcf58ecf6356e071b14c77c7735aae748907"
       }
     }
@@ -597,7 +597,7 @@
       },
       "blockminer": {
         "name": "blockminer-v1.1.1-mc1.21.8.jar",
-        "url": "https://github.com/z7087/blockminer/releases/download/prerelease/blockminer-v1.1.1-mc1.21.8.jar",
+        "url": "https://github.com/z7087/blockminer/releases/download/1.1.1/blockminer-v1.1.1-mc1.21.8.jar",
         "sha256": "031489347d2f79ecbe14c6802ef4bcf58ecf6356e071b14c77c7735aae748907"
       }
     }
@@ -664,7 +664,7 @@
       },
       "blockminer": {
         "name": "blockminer-v1.1.1-mc1.21.10.jar",
-        "url": "https://github.com/z7087/blockminer/releases/download/prerelease/blockminer-v1.1.1-mc1.21.10.jar",
+        "url": "https://github.com/z7087/blockminer/releases/download/1.1.1/blockminer-v1.1.1-mc1.21.10.jar",
         "sha256": "dd079a44ef6ff4f425906ec67d6e080fee94fa64f75c8eda2057c3aed103e653"
       }
     }
@@ -731,7 +731,7 @@
       },
       "blockminer": {
         "name": "blockminer-v1.1.1-mc1.21.10.jar",
-        "url": "https://github.com/z7087/blockminer/releases/download/prerelease/blockminer-v1.1.1-mc1.21.10.jar",
+        "url": "https://github.com/z7087/blockminer/releases/download/1.1.1/blockminer-v1.1.1-mc1.21.10.jar",
         "sha256": "dd079a44ef6ff4f425906ec67d6e080fee94fa64f75c8eda2057c3aed103e653"
       }
     }
