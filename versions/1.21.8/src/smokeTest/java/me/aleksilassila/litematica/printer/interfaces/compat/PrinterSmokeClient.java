@@ -78,7 +78,10 @@ public final class PrinterSmokeClient implements ClientModInitializer {
     private void tick(Minecraft client) {
         if (stage == 100) return;
         try {
-            if (System.currentTimeMillis() > deadline) throw new AssertionError("Timeout in stage " + stage);
+            if (System.currentTimeMillis() > deadline) {
+                diagnoseTimeout(client);
+                throw new AssertionError("Timeout in stage " + stage);
+            }
             ticks++;
             switch (stage) {
                 case 0 -> {
@@ -508,6 +511,20 @@ public final class PrinterSmokeClient implements ClientModInitializer {
         boolean present = blockConfirmation.join();
         blockConfirmation = null;
         return present;
+    }
+
+    private void diagnoseTimeout(Minecraft client) {
+        if (client.player == null || client.level == null) return;
+        LOG.error("PRINTER_SMOKE_TIMEOUT stage={} ticks={} clientTarget={} player={} hand={} screen={} paused={} work={} fill={}",
+                stage, ticks, client.level.getBlockState(PLACE), client.player.position(),
+                client.player.getMainHandItem(), client.screen, client.isPaused(),
+                Configs.Core.WORK_SWITCH.getBooleanValue(), Configs.Fill.ENABLED.getBooleanValue());
+        var server = client.getSingleplayerServer();
+        if (server != null) server.execute(() -> {
+            var player = server.getPlayerList().getPlayers().getFirst();
+            LOG.error("PRINTER_SMOKE_TIMEOUT_SERVER target={} player={} hand={} stoneCount={}",
+                    server.overworld().getBlockState(PLACE), player.position(), player.getMainHandItem(), countStone(server));
+        });
     }
 
     private void advance(int next) {

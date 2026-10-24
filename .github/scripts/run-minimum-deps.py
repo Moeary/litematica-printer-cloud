@@ -55,6 +55,7 @@ for repo,sha in minimum['companions'].items():
     jar=jars[0]
     companions['quick' if repo=='quickshulker' else 'chain']={'name':jar.name,'url':jar.as_uri(),'sha256':hashlib.sha256(jar.read_bytes()).hexdigest()}
 gradle(ROOT,'-Ptargets='+mc,':core:test',':'+mc+':remapJar',':'+mc+':remapSmokeJar')
+failures=[]
 for profile in ('minimum','current'):
     inputs=json.loads(json.dumps(original))
     inputs[mc].update(companions)
@@ -64,14 +65,21 @@ for profile in ('minimum','current'):
         env['MAPPED_CI_LOADER']='0.19.3'
     else:
         env['MAPPED_CI_LOADER']=minimum['loader']
-    subprocess.run([sys.executable,str(ROOT/'.github/scripts/run-mapped-ci.py'),mc,'functional'],cwd=ROOT,env=env,check=True)
+    result=subprocess.run([sys.executable,str(ROOT/'.github/scripts/run-mapped-ci.py'),mc,'functional'],cwd=ROOT,env=env)
     source=ROOT/'.ci/results'/mc
     expected_loader=env['MAPPED_CI_LOADER']
     for mode in ('full','legacy','nochain'):
-        console=(source/mode/'console.log').read_text(encoding='utf-8',errors='replace')
-        assert ('Fabric Loader '+expected_loader) in console,(mc,mode,'actual loader mismatch',expected_loader)
+        log=source/mode/'console.log'
+        console=log.read_text(encoding='utf-8',errors='replace') if log.exists() else ''
+        if ('Fabric Loader '+expected_loader) not in console:
+            failures.append({'profile':profile,'mode':mode,'error':'actual loader mismatch','expectedLoader':expected_loader})
+    if result.returncode:failures.append({'profile':profile,'exit':result.returncode})
     destination=ROOT/'.ci/minimum-results'/mc/profile
     destination.parent.mkdir(exist_ok=True,parents=True)
     shutil.move(source,destination)
     (destination/'dependency-profile.json').write_text(json.dumps({'profile':profile,'expectedLoader':expected_loader,'inputs':inputs[mc]},indent=2),encoding='utf-8')
+(ROOT/'.ci/minimum-results'/mc/'summary.json').write_text(json.dumps({'status':'FAIL' if failures else 'PASS','failures':failures},indent=2),encoding='utf-8')
+if failures:
+    print('MINIMUM_AND_CURRENT_FAIL',mc,json.dumps(failures),flush=True)
+    raise SystemExit(1)
 print('MINIMUM_AND_CURRENT_PASS',mc,flush=True)
