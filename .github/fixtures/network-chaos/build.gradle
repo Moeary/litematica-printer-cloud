@@ -1,0 +1,22 @@
+plugins { id 'net.fabricmc.fabric-loom-remap' version '1.17.20' }
+def mc = providers.gradleProperty('minecraft_version').get()
+def api = providers.gradleProperty('fabric_api_version').get()
+def minor = mc == '1.21' ? 0 : mc.tokenize('.').last().toInteger()
+def profile = minor <= 4 ? 'old' : (minor == 5 ? 'mid' : 'modern')
+version = '1.0.0-alpha.3-audit+' + mc
+group = 'org.edtp.networkchaos.ci'
+repositories { maven { url = 'https://maven.fabricmc.net' } }
+dependencies {
+    minecraft "com.mojang:minecraft:${mc}"
+    mappings loom.officialMojangMappings()
+    modImplementation 'net.fabricmc:fabric-loader:0.19.3'
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${api}"
+}
+sourceSets.main.java.srcDir('src/' + profile + '/java')
+processResources {
+    inputs.properties(version: project.version, minecraft_version: mc)
+    filesMatching('fabric.mod.json') { expand(version: project.version, minecraft_version: mc) }
+}
+tasks.withType(JavaCompile).configureEach { options.release = 21 }
+tasks.named('remapJar') { archiveFileName = 'network-chaos-audit-' + mc + '.jar' }
+layout.buildDirectory = file('../../../.ci/network/build')

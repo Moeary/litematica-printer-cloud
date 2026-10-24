@@ -1,0 +1,59 @@
+// Production-only execution of the mapped client's existing integration assertions.
+gradle.afterProject { p, state ->
+    if (!p.plugins.hasPlugin('net.fabricmc.fabric-loom-remap')) return
+    def mc = p.name
+    if (!mc.startsWith('1.21')) return
+    def kind = p.providers.gradleProperty('ciKind').orElse('smoke').get()
+    def mode = p.providers.gradleProperty('ciMode').orElse('full').get()
+    def scenario = p.providers.gradleProperty('ciScenario').orElse(mode).get()
+    def directory = new File(p.rootProject.projectDir, '.ci/results/' + mc + '/' + scenario)
+    def inputs = new File(p.rootProject.projectDir, '.ci/dependencies/' + mc + '/' + scenario)
+    def bridge = new File(directory, 'bridge')
+    def result = new File(directory, kind == 'smoke' ? 'printer-smoke-result.txt' : 'result.json')
+    def loomLoader = p.tasks.named('remapJar').get().getClass().classLoader
+    def clientTaskType = loomLoader.loadClass('net.fabricmc.loom.task.prod.ClientProductionRunTask')
+    def serverTaskType = loomLoader.loadClass('net.fabricmc.loom.task.prod.ServerProductionRunTask')
+    def common = [ '-Xmx2G', '-Djava.net.preferIPv4Stack=true' ]
+    def audit = [ '-Dprinter.audit.case=' + (kind == 'stress' ? 'stress' : 'bedrock'),
+        '-Dprinter.audit.miner=' + p.providers.gradleProperty('ciMiner').orElse('none').get(),
+        '-Dprinter.audit.servux=' + p.providers.gradleProperty('ciServux').orElse('false').get(),
+        '-Dprinter.audit.placeCooldown=' + p.providers.gradleProperty('ciCooldown').orElse('0').get(),
+        '-Dprinter.audit.result=' + result.absolutePath,
+        '-Dprinter.audit.bridge=' + bridge.absolutePath,
+        '-Dprinter.audit.dedicated=' + (kind == 'stress'),
+        '-Dprinter.audit.address=127.0.0.1:25587' ]
+    p.tasks.register('runMappedClientCI', clientTaskType) {
+        dependsOn p.tasks.named('remapJar'), p.tasks.named(kind == 'smoke' ? 'remapSmokeJar' : 'remapAuditJar')
+        mods.setFrom(p.tasks.named('remapJar'), p.tasks.named(kind == 'smoke' ? 'remapSmokeJar' : 'remapAuditJar'), p.fileTree(inputs) { include '*.jar' })
+        runDir = directory
+        jvmArgs.addAll(common)
+        if (kind == 'smoke') {
+            def required = mode == 'nochain' ? 'quickshulker' : 'chainveinfabric,quickshulker'
+            jvmArgs.addAll(['-Dprinter.smoke.quickMode=' + mode,
+                '-Dprinter.smoke.result=' + result.absolutePath, '-Dprinter.smoke.requireMods=' + required])
+        } else jvmArgs.addAll(audit)
+        programArgs.addAll(['--username', kind == 'smoke' ? 'PrinterSmoke' : 'PrinterAudit',
+            '--uuid', '00000000000000000000000000000001', '--width', '960', '--height', '540'])
+        doFirst {
+            directory.mkdirs()
+            result.delete()
+            new File(directory, 'options.txt').text = 'soundCategory_master:0.0\nmaxFps:60\nenableVsync:false\nrenderDistance:3\nsimulationDistance:5\n'
+        }
+    }
+    if (kind == 'stress') {
+        p.tasks.register('runMappedServerCI', serverTaskType) {
+            dependsOn p.tasks.named('remapAuditServerJar')
+            installerVersion = '1.0.1'
+            mods.setFrom(p.tasks.named('remapAuditServerJar'), p.fileTree(new File(inputs, 'server')) { include '*.jar' })
+            runDir = new File(directory, 'server')
+            jvmArgs.addAll(['-Xmx1500M', '-Dprinter.audit.bridge=' + bridge.absolutePath])
+            programArgs.add('nogui')
+            doFirst {
+                runDir.get().asFile.mkdirs()
+                bridge.mkdirs()
+                new File(runDir.get().asFile, 'eula.txt').text = 'eula=true\n'
+                new File(runDir.get().asFile, 'server.properties').text = 'online-mode=false\nserver-ip=127.0.0.1\nserver-port=25587\nlevel-type=minecraft:flat\ngamemode=survival\ndifficulty=peaceful\nspawn-protection=0\nview-distance=4\nsimulation-distance=4\n'
+            }
+        }
+    }
+}
