@@ -124,20 +124,20 @@
         "sha256": "ba77c70ae9b239e05f256cd64266b958528701ff6fc0088afc4be2e04bc167cb"
       },
       {
-        "name": "malilib-fabric-1.21.4-0.23.3.jar",
-        "url": "https://cdn.modrinth.com/data/GcWjdA9I/versions/MZcHwIU7/malilib-fabric-1.21.4-0.23.3.jar",
-        "sha256": "13e29f356c26afe9544411ce69cee943c16f7d18a0f47aaebb3e634f9e9fee4d"
+        "name": "malilib-fabric-1.21.4-0.23.5.jar",
+        "url": "https://cdn.modrinth.com/data/GcWjdA9I/versions/ifi4uRpL/malilib-fabric-1.21.4-0.23.5.jar",
+        "sha256": "07e2c7569378e37059b35c0cf7a6530554f756737c8e341e1a8c2312dc2d4548"
       },
       {
-        "name": "litematica-fabric-1.21.4-0.21.3.jar",
-        "url": "https://cdn.modrinth.com/data/bEpr0Arc/versions/HGMPLnum/litematica-fabric-1.21.4-0.21.3.jar",
-        "sha256": "920c70dce1b3575a78ecb2b809adf095c5c2c83000c14771f031da11ea807666"
+        "name": "litematica-fabric-1.21.4-0.21.7.jar",
+        "url": "https://cdn.modrinth.com/data/bEpr0Arc/versions/Z7jnVo9V/litematica-fabric-1.21.4-0.21.7.jar",
+        "sha256": "19fbf46ddc0776c2ff2a1be4cac627b3a236cc4682ce93d01c858e1437e93d4d"
       }
     ],
     "versions": {
       "fabric-api": "0.110.5+1.21.4",
-      "malilib": "0.23.3",
-      "litematica": "0.21.3"
+      "malilib": "0.23.5",
+      "litematica": "0.21.7"
     },
     "companions": {
       "quickshulker": "1dc86bb21b1a3fd842efaf47d6a9034e5a818d53",

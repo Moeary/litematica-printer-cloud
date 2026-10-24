@@ -169,7 +169,135 @@ public final class QuickShulkerTransferGameTests {
     }
 
     @GameTest(template = "fabric-gametest-api-v1:empty")
-    public void versionAndUnd…1532 tokens truncated…y")
+    public void versionAndUnderlyingViewsFollowAuthoritativeSlotState(
+            GameTestHelper helper) {
+        ServerPlayer player = player(helper);
+        ItemStack host = box(new ItemStack(Items.STONE, 8));
+        player.getInventory().setItem(BOX_SLOT, host);
+        SlottedStorage<ItemVariant> liveStorage = storage(player, BOX_SLOT);
+
+        host.set(
+                DataComponents.CONTAINER,
+                ItemContainerContents.fromItems(List.of(new ItemStack(Items.DIRT, 4))));
+        liveStorage.getVersion();
+        helper.assertValueEqual(
+                liveStorage.getSlot(0).getUnderlyingView().getResource(),
+                ItemVariant.of(Items.DIRT),
+                "The underlying view must expose the authoritative slot state");
+
+        try (Transaction transaction = Transaction.openOuter()) {
+            helper.assertValueEqual(
+                    liveStorage.extract(ItemVariant.of(Items.DIRT), 1, transaction),
+                    1L, "getVersion() must not detach the live storage from its slot");
+            transaction.commit();
+        }
+        ItemStack current = player.getInventory().getItem(BOX_SLOT);
+        helper.assertValueEqual(count(current, Items.DIRT), 3,
+                "The live storage must update the externally supplied contents");
+        helper.assertValueEqual(count(current, Items.STONE), 0,
+                "No obsolete container snapshot may be restored");
+        helper.succeed();
+    }
+
+    @GameTest(template = "fabric-gametest-api-v1:empty")
+    public void independentlyResolvedHandlesRemainComposableAcrossCommits(
+            GameTestHelper helper) {
+        ServerPlayer player = player(helper);
+        ItemStack host = box(new ItemStack(Items.STONE, 8));
+        player.getInventory().setItem(BOX_SLOT, host);
+        SlottedStorage<ItemVariant> first = storage(player, BOX_SLOT);
+        SlottedStorage<ItemVariant> second = storage(player, BOX_SLOT);
+
+        try (Transaction transaction = Transaction.openOuter()) {
+            helper.assertValueEqual(
+                    first.extract(ItemVariant.of(Items.STONE), 2, transaction),
+                    2L, "The first storage should commit normally");
+            transaction.commit();
+        }
+        helper.assertValueEqual(count(host, Items.STONE), 6,
+                "The first storage should debit the authoritative host");
+
+        second.getVersion();
+        try (Transaction transaction = Transaction.openOuter()) {
+            helper.assertValueEqual(
+                    second.extract(ItemVariant.of(Items.STONE), 1, transaction),
+                    1L, "A second handle must continue from the first commit");
+            transaction.commit();
+        }
+        helper.assertValueEqual(
+                count(player.getInventory().getItem(BOX_SLOT), Items.STONE),
+                5, "The second handle must preserve and extend the first commit");
+        helper.succeed();
+    }
+
+    @GameTest(template = "fabric-gametest-api-v1:empty")
+    public void resolvedStorageRemainsUsableAcrossItsOwnCommits(GameTestHelper helper) {
+        ServerPlayer player = player(helper);
+        ItemStack host = box();
+        player.getInventory().setItem(BOX_SLOT, host);
+        SlottedStorage<ItemVariant> storage = storage(player, BOX_SLOT);
+
+        try (Transaction transaction = Transaction.openOuter()) {
+            helper.assertValueEqual(
+                    storage.insert(ItemVariant.of(Items.STONE), 3, transaction),
+                    3L, "The first transaction should use the resolved storage");
+            transaction.commit();
+        }
+        storage.getVersion();
+        try (Transaction transaction = Transaction.openOuter()) {
+            helper.assertValueEqual(
+                    storage.insert(ItemVariant.of(Items.STONE), 2, transaction),
+                    2L, "The same handle should follow its committed slot state");
+            transaction.commit();
+        }
+
+        helper.assertValueEqual(count(host, Items.STONE), 5,
+                "One storage handle should remain reusable after its own commit");
+        helper.succeed();
+    }
+
+    @GameTest(template = "fabric-gametest-api-v1:empty")
+    public void storageVersionAdvancesAfterCommit(GameTestHelper helper) {
+        ServerPlayer player = player(helper);
+        player.getInventory().setItem(BOX_SLOT, box());
+        SlottedStorage<ItemVariant> storage = storage(player, BOX_SLOT);
+        long before = storage.getVersion();
+
+        try (Transaction transaction = Transaction.openOuter()) {
+            storage.insert(ItemVariant.of(Items.STONE), 3, transaction);
+            transaction.commit();
+        }
+
+        helper.assertTrue(storage.getVersion() > before,
+                "A committed storage mutation should advance its version");
+        helper.succeed();
+    }
+
+    @GameTest(template = "fabric-gametest-api-v1:empty")
+    public void transactionMutationIsVisibleThroughTheAuthoritativeSlot(
+            GameTestHelper helper) {
+        ServerPlayer player = player(helper);
+        ItemStack host = box(new ItemStack(Items.STONE, 8));
+        player.getInventory().setItem(BOX_SLOT, host);
+        SlottedStorage<ItemVariant> storage = storage(player, BOX_SLOT);
+
+        try (Transaction transaction = Transaction.openOuter()) {
+            helper.assertValueEqual(
+                    storage.insert(ItemVariant.of(Items.DIRT), 4, transaction),
+                    4L, "The tentative insert should be accepted");
+            helper.assertValueEqual(
+                    count(player.getInventory().getItem(BOX_SLOT), Items.DIRT),
+                    4, "Fabric transactions mutate participant state before commit");
+            transaction.commit();
+        }
+
+        helper.assertValueEqual(
+                count(player.getInventory().getItem(BOX_SLOT), Items.DIRT), 4,
+                "The committed insert should be written to the host");
+        helper.succeed();
+    }
+
+    @GameTest(template = "fabric-gametest-api-v1:empty")
     public void finalCommitMustNotOverwriteOutOfBandHostChange(
             GameTestHelper helper) {
         ServerPlayer player = player(helper);
