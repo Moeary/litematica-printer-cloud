@@ -1,0 +1,644 @@
+[
+  {
+    "id": 422691551,
+    "tag_name": "v1.1.4",
+    "target_commitish": "9508bec4834b93abd8fbb896af882704b720296c",
+    "name": "Litematica Printer 1.1.4 — MC 1.21–1.21.10 最低依赖版",
+    "body": "# Litematica Printer 1.1.4：Minecraft 1.21–1.21.10 最低依赖版\n\n本版单独发布。原 [v1.1.3](https://github.com/water2004/litematica-printer/releases/tag/v1.1.3) 的较新 Fabric 依赖构建、标签和全部文件保持原样。两个 Release 同时保留。26.x 继续使用原 Release，本版没有重新发布 26.x 文件。\n\n## 安装与版本区分\n\n- 单独下载 `litematica-printer-1.1.4+<Minecraft版本>.jar`，按下表安装对应依赖。\n- `minimum-dependencies-1.1.4-mc1.21-1.21.10.zip` 按 Minecraft 版本分为 11 个目录。每个目录包含 Printer 1.1.4、最低依赖构建的 Quick Shulker 和 ChainVein，共 33 个正式 JAR。\n- 配套模组的内部版本号仍为原项目版本。它们仅在本版 ZIP 中提供；原配套仓库 Release 不替换。使用旧依赖时请使用 ZIP 内的配套构建。\n- 同一 Minecraft 实例只保留同一模组的一个 JAR。不要同时安装 Printer 1.1.3 和 1.1.4。\n- Mod Menu 可选。安装它时还须满足它自身的依赖要求。\n\n## 最低依赖版本\n\n下表为本轮验证的最低支持组合，按 Minecraft 版本分别使用。Java 要求保持 21。\n\n| Minecraft | Fabric Loader | Fabric API | MaLiLib | Litematica |\n|---|---|---|---|---|\n| 1.21 | 0.16.0 | 0.100.2+1.21 | 0.21.10 | 0.19.61 |\n| 1.21.1 | 0.16.0 | 0.102.0+1.21.1 | 0.21.10 | 0.19.61 |\n| 1.21.2 | 0.16.8 | 0.106.1+1.21.2 | 0.22.8 | 0.20.9 |\n| 1.21.3 | 0.16.8 | 0.106.1+1.21.3 | 0.22.8 | 0.20.9 |\n| 1.21.4 | 0.16.9 | 0.110.5+1.21.4 | 0.23.5 | 0.21.7 |\n| 1.21.5 | 0.16.10 | 0.119.5+1.21.5 | 0.24.3 | 0.22.5 |\n| 1.21.6 | 0.16.13 | 0.128.0+1.21.6 | 0.25.7 | 0.23.7 |\n| 1.21.7 | 0.16.13 | 0.128.1+1.21.7 | 0.25.7 | 0.23.7 |\n| 1.21.8 | 0.16.13 | 0.129.0+1.21.8 | 0.25.7 | 0.23.7 |\n| 1.21.9 | 0.17.0 | 0.133.14+1.21.9 | 0.26.7 | 0.24.8 |\n| 1.21.10 | 0.17.0 | 0.134.1+1.21.10 | 0.26.7 | 0.24.8 |\n\n## 改动与验证\n\nPrinter 生产 Java 代码保持原样。本版调整依赖声明与模组版本号。Quick Shulker 1.21.1 适配旧 Fabric Transfer API；ChainVein 生产 Java 代码保持原样。\n\n发布流程先重新构建 1.1.4，再运行全部 11 个版本的最低依赖和原依赖两组检查。每组覆盖 full、legacy、nochain，共 66 次实际客户端运行。配套模组同时执行单元测试和 GameTest。只有全部通过，流程才发布正式文件。下载文件的 SHA-256 见 `SHA256SUMS.txt`；逐版本结果见 `validation-1.1.4.json`。\n\n此前 1.21.4–1.21.8 的 stage 4 超时来自测试在原版入场确认前启动首次填充。五版本诊断的 12 次失败都先放置、后入场确认。等待 `hasClientLoaded()` 后，同依赖对照 30/30 次通过。这是测试初始化修正，不是降低依赖导致的接口不兼容。\n\n- [诊断 CI](https://github.com/water2004/litematica-printer/actions/runs/40072291304)\n- [原最低依赖对照 CI：11/11 版本、66/66 次通过](https://github.com/water2004/litematica-printer/actions/runs/40072764075)\n- [迁移 PR 与完整排查结论](https://github.com/water2004/litematica-printer/pull/1)\n\n## 已知限制\n\n本版不修改打印机生产放置逻辑，不宣称修复丢包或幽灵方块。原 1.1.3 的压力测试失败记录继续有效：指定 Servux 丢包场景中，1.21.7 记录 2 个错误方块，1.21.9 记录 4 个错误方块，1.21.10 记录 2 个错误方块。兼容性检查通过不代表这些压力场景通过。\n\n1.1.4 本次构建与 66 次兼容性运行：[CI 40089320740](https://github.com/water2004/litematica-printer/actions/runs/40089320740)。源码提交：`9508bec4834b93abd8fbb896af882704b720296c`。\n",
+    "draft": true,
+    "prerelease": false,
+    "assets": [
+      {
+        "id": 672097076,
+        "name": "litematica-printer-1.1.4+1.21.1.jar",
+        "digest": "sha256:9d7ee71cc581f44ddcb8aa28e76646762a56e1ea42007cf58882fdb608843df3",
+        "size": 808296,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-10-24T11:30:57Z"
+      },
+      {
+        "id": 672097455,
+        "name": "litematica-printer-1.1.4+1.21.10.jar",
+        "digest": "sha256:ec083fb9004ab0ae6ec83cf8fb2ccace85a489da7ba10bbe1b61248915f7e702",
+        "size": 809127,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-10-24T11:31:06Z"
+      },
+      {
+        "id": 672097108,
+        "name": "litematica-printer-1.1.4+1.21.2.jar",
+        "digest": "sha256:d16734ecf76ce34b3b65ad1594b9f6fe4d615fd305baf7f05a75c325acfc3e0d",
+        "size": 808403,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-10-24T11:30:58Z"
+      },
+      {
+        "id": 672097155,
+        "name": "litematica-printer-1.1.4+1.21.3.jar",
+        "digest": "sha256:e0c77e3b469fa0a5ace0685eb97a672524aa76308870f0484ede539160cdc992",
+        "size": 808405,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-10-24T11:30:59Z"
+      },
+      {
+        "id": 672097185,
+        "name": "litematica-printer-1.1.4+1.21.4.jar",
+        "digest": "sha256:5ac2211166fd5d74d33d911551ce394f518716169dfa4d9465fb2fd942aec441",
+        "size": 808405,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-10-24T11:31:00Z"
+      },
+      {
+        "id": 672097266,
+        "name": "litematica-printer-1.1.4+1.21.5.jar",
+        "digest": "sha256:6983ee9a09a461420cd2bd568f0673e8e759bc0e595e84b0eda3f819440ef0a4",
+        "size": 809349,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-10-24T11:31:01Z"
+      },
+      {
+        "id": 672097321,
+        "name": "litematica-printer-1.1.4+1.21.6.jar",
+        "digest": "sha256:61fb23251c7901b02163b4ffcfc3c73c95eaf81c08c028765d233d8c9545d7a5",
+        "size": 808891,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-10-24T11:31:03Z"
+      },
+      {
+        "id": 672097362,
+        "name": "litematica-printer-1.1.4+1.21.7.jar",
+        "digest": "sha256:295b7d4b406a7e728c166fa846df39ebf4e12e37463ec7b1d30b7c56f7628871",
+        "size": 808890,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-10-24T11:31:03Z"
+      },
+      {
+        "id": 672097398,
+        "name": "litematica-printer-1.1.4+1.21.8.jar",
+        "digest": "sha256:7d53d1584ac413fcf2d3352a0e1659d752dd665987ca4c33866992fc6ae59d31",
+        "size": 808891,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-10-24T11:31:04Z"
+      },
+      {
+        "id": 672097430,
+        "name": "litematica-printer-1.1.4+1.21.9.jar",
+        "digest": "sha256:811fd7fbd8d32960a440eafd7618c2cd886f47d85b99d6874501ca07c98716db",
+        "size": 808893,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-10-24T11:31:05Z"
+      },
+      {
+        "id": 672097042,
+        "name": "litematica-printer-1.1.4+1.21.jar",
+        "digest": "sha256:402580e3f3c2385333fdeb015bd267727cca7ecad9a3b2c64582a8cda3afb603",
+        "size": 808295,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-10-24T11:30:56Z"
+      },
+      {
+        "id": 672097486,
+        "name": "minimum-dependencies-1.1.4-mc1.21-1.21.10.zip",
+        "digest": "sha256:cbf9e067464dccd89c216e37b97c2ef7dd9073c98eebda9d73dc423bf2349e1a",
+        "size": 22227330,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-10-24T11:31:07Z"
+      },
+      {
+        "id": 672097556,
+        "name": "SHA256SUMS.txt",
+        "digest": "sha256:39147bc9777048e561f6a67776f68f0d5732d923a9ede7e72d14ea9cd6396454",
+        "size": 1321,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-10-24T11:31:10Z"
+      },
+      {
+        "id": 672097537,
+        "name": "validation-1.1.4.json",
+        "digest": "sha256:7d2fb58b3fd28d29644d6d48de70748de136cf86c12f5028cd45712b820b78a7",
+        "size": 26246,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-10-24T11:31:09Z"
+      }
+    ]
+  },
+  {
+    "id": 422699354,
+    "tag_name": "v1.1.5",
+    "target_commitish": "80b2d225f56038e0d9a40f07c151fc965ab8b108",
+    "name": "Litematica Printer 1.1.5 — MC 1.21–1.21.10 最低依赖版",
+    "body": "# Litematica Printer 1.1.5：Minecraft 1.21–1.21.10 最低依赖版\n\n本版单独发布。原 [v1.1.3](https://github.com/water2004/litematica-printer/releases/tag/v1.1.3) 的较新 Fabric 依赖构建、标签和全部文件保持原样。两个 Release 同时保留。26.x 继续使用原 Release，本版没有重新发布 26.x 文件。\n\n## 安装与版本区分\n\n- 单独下载 `litematica-printer-1.1.5+<Minecraft版本>.jar`，按下表安装对应依赖。\n- `minimum-dependencies-1.1.5-mc1.21-1.21.10.zip` 按 Minecraft 版本分为 11 个目录。每个目录包含 Printer 1.1.5、最低依赖构建的 Quick Shulker 和 ChainVein，共 33 个正式 JAR。\n- 配套模组的内部版本号仍为原项目版本。它们仅在本版 ZIP 中提供；原配套仓库 Release 不替换。使用旧依赖时请使用 ZIP 内的配套构建。\n- 同一 Minecraft 实例只保留同一模组的一个 JAR。不要同时安装 Printer 1.1.3 和 1.1.5。\n- Mod Menu 可选。安装它时还须满足它自身的依赖要求。\n\n## 最低依赖版本\n\n下表为本轮验证的最低支持组合，按 Minecraft 版本分别使用。Java 要求保持 21。\n\n| Minecraft | Fabric Loader | Fabric API | MaLiLib | Litematica |\n|---|---|---|---|---|\n| 1.21 | 0.16.0 | 0.100.2+1.21 | 0.21.10 | 0.19.61 |\n| 1.21.1 | 0.16.0 | 0.102.0+1.21.1 | 0.21.10 | 0.19.61 |\n| 1.21.2 | 0.16.8 | 0.106.1+1.21.2 | 0.22.8 | 0.20.9 |\n| 1.21.3 | 0.16.8 | 0.106.1+1.21.3 | 0.22.8 | 0.20.9 |\n| 1.21.4 | 0.16.9 | 0.110.5+1.21.4 | 0.23.5 | 0.21.7 |\n| 1.21.5 | 0.16.10 | 0.119.5+1.21.5 | 0.24.3 | 0.22.5 |\n| 1.21.6 | 0.16.13 | 0.128.0+1.21.6 | 0.25.7 | 0.23.7 |\n| 1.21.7 | 0.16.13 | 0.128.1+1.21.7 | 0.25.7 | 0.23.7 |\n| 1.21.8 | 0.16.13 | 0.129.0+1.21.8 | 0.25.7 | 0.23.7 |\n| 1.21.9 | 0.17.0 | 0.133.14+1.21.9 | 0.26.7 | 0.24.8 |\n| 1.21.10 | 0.17.0 | 0.134.1+1.21.10 | 0.26.7 | 0.24.8 |\n\n## 改动与验证\n\n本版恢复并保持已发布 1.1.3 的生产放置行为。1.1.4 在发布复核中发现：远程基线的 1.21.10 ActionManager 含有一段此前排除的实验预测代码。1.1.4 因此撤回为草稿，原标签和附件保留用于审计。本版以新版本号 1.1.5 发布，不覆盖 1.1.4。除恢复该基线差异外，本版调整依赖声明与模组版本号。CI 新增全部 1,431 个生产 Java 源文件的哈希门禁。Quick Shulker 1.21.1 适配旧 Fabric Transfer API；ChainVein 生产 Java 代码保持原样。\n\n发布流程先重新构建 1.1.5，再运行全部 11 个版本的最低依赖和原依赖两组检查。每组覆盖 full、legacy、nochain，共 66 次实际客户端运行。配套模组同时执行单元测试和 GameTest。只有全部通过，流程才发布正式文件。下载文件的 SHA-256 见 `SHA256SUMS.txt`；逐版本结果见 `validation-1.1.5.json`。\n\n此前 1.21.4–1.21.8 的 stage 4 超时来自测试在原版入场确认前启动首次填充。五版本诊断的 12 次失败都先放置、后入场确认。等待 `hasClientLoaded()` 后，同依赖对照 30/30 次通过。这是测试初始化修正，不是降低依赖导致的接口不兼容。\n\n- [诊断 CI](https://github.com/water2004/litematica-printer/actions/runs/40072291304)\n- [历史最低依赖对照 CI（1.21.10 含上述基线差异）](https://github.com/water2004/litematica-printer/actions/runs/40072764075)\n- [迁移 PR 与完整排查结论](https://github.com/water2004/litematica-printer/pull/1)\n\n## 已知限制\n\n本版不修改打印机生产放置逻辑，不宣称修复丢包或幽灵方块。原 1.1.3 的压力测试失败记录继续有效：指定 Servux 丢包场景中，1.21.7 记录 2 个错误方块，1.21.9 记录 4 个错误方块，1.21.10 记录 2 个错误方块。兼容性检查通过不代表这些压力场景通过。\n\n1.1.5 本次构建与 66 次兼容性运行：[CI 40090454633](https://github.com/water2004/litematica-printer/actions/runs/40090454633)。源码提交：`80b2d225f56038e0d9a40f07c151fc965ab8b108`。\n",
+    "draft": false,
+    "prerelease": false,
+    "assets": [
+      {
+        "id": 672132968,
+        "name": "litematica-printer-1.1.5+1.21.1.jar",
+        "digest": "sha256:9458d9b327a3dae2176bca12c973c339292921dbb53315dfa68cb16a90d8a1ce",
+        "size": 808297,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-10-24T11:46:59Z"
+      },
+      {
+        "id": 672133224,
+        "name": "litematica-printer-1.1.5+1.21.10.jar",
+        "digest": "sha256:8a52d66deb685c9afc2ea1b40cc43a0a9f0effd1a97f08d825e91f883438127f",
+        "size": 809069,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-10-24T11:47:06Z"
+      },
+      {
+        "id": 672133005,
+        "name": "litematica-printer-1.1.5+1.21.2.jar",
+        "digest": "sha256:c636cf7f9de16a829672f6887f577d4e44c3b903cd0d5b458d0ff886cf3166fd",
+        "size": 808403,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-10-24T11:47:00Z"
+      },
+      {
+        "id": 672133044,
+        "name": "litematica-printer-1.1.5+1.21.3.jar",
+        "digest": "sha256:1b3c7c664e2ddfc7eff05064e948c28a31dde490c6a1a9b2a57536c218ede1b8",
+        "size": 808404,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-10-24T11:47:01Z"
+      },
+      {
+        "id": 672133065,
+        "name": "litematica-printer-1.1.5+1.21.4.jar",
+        "digest": "sha256:0ef291b2fecd03293745a345fa61b03b47addb9c4f1526b3e7157f71382d2362",
+        "size": 808405,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-10-24T11:47:01Z"
+      },
+      {
+        "id": 672133096,
+        "name": "litematica-printer-1.1.5+1.21.5.jar",
+        "digest": "sha256:84ae303f8afbffbdeac3c4b453e5a089733f6a18595a442f60c77fd8be96fa21",
+        "size": 809347,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-10-24T11:47:02Z"
+      },
+      {
+        "id": 672133120,
+        "name": "litematica-printer-1.1.5+1.21.6.jar",
+        "digest": "sha256:eb3d6fa646acdbc27fbcbadd978c9eff0428a8df94ce433211d7930924e4b31c",
+        "size": 808892,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-10-24T11:47:03Z"
+      },
+      {
+        "id": 672133145,
+        "name": "litematica-printer-1.1.5+1.21.7.jar",
+        "digest": "sha256:51bf544c00d69e8fc74a7be16c89284349a5707c6096894ac8e463ecd2fe5496",
+        "size": 808890,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-10-24T11:47:04Z"
+      },
+      {
+        "id": 672133169,
+        "name": "litematica-printer-1.1.5+1.21.8.jar",
+        "digest": "sha256:11ac076ae24efba8b4646d410670b6664c154daf78e3f31c1a07fdf747d9579c",
+        "size": 808892,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-10-24T11:47:04Z"
+      },
+      {
+        "id": 672133205,
+        "name": "litematica-printer-1.1.5+1.21.9.jar",
+        "digest": "sha256:cb5a629e98b7f5b5b6d2beb8d260756ff4f5fdd82932518660e1c990660a791f",
+        "size": 808894,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-10-24T11:47:05Z"
+      },
+      {
+        "id": 672132941,
+        "name": "litematica-printer-1.1.5+1.21.jar",
+        "digest": "sha256:caaf53ce1c9dfc2d496cbf5c58cb158daa5f4b1bf7914450b75ae4bee8dc29e4",
+        "size": 808295,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-10-24T11:46:58Z"
+      },
+      {
+        "id": 672133236,
+        "name": "minimum-dependencies-1.1.5-mc1.21-1.21.10.zip",
+        "digest": "sha256:4a1dbb6449f9faecfe6891ef38cea0df98a88fd2dfe77b109b89dafbc1f96cde",
+        "size": 22227808,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-10-24T11:47:06Z"
+      },
+      {
+        "id": 672133311,
+        "name": "SHA256SUMS.txt",
+        "digest": "sha256:b61d10dd4ecb576eff79f04fec7da6ae98668be2662209e598bc49837e408048",
+        "size": 1321,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-10-24T11:47:08Z"
+      },
+      {
+        "id": 672133283,
+        "name": "validation-1.1.5.json",
+        "digest": "sha256:8131e9beb18e88f1ab37845f6ea3a831db92408668f2c76c207ad0bff50f0afa",
+        "size": 28182,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-10-24T11:47:08Z"
+      }
+    ]
+  },
+  {
+    "id": 417572852,
+    "tag_name": "v1.1.3",
+    "target_commitish": "main",
+    "name": "Litematica Printer 4th v1.1.3",
+    "body": "# Litematica Printer 4th 1.1.3\n\n- Fixed ice-to-water printing above solid ground by following vanilla ice-breaking support conditions. Unsupported air below the target still prevents ice placement for water generation.\n- Fixed stale water-wait state blocking later ice-to-water jobs at the same position. Ice breaking now follows the regular producer-consumer cycle and respects the configured coordinate cooldown.\n- Preserve both upward and downward source-water bubble columns when printing ordinary water sources, instead of replacing them with ice.\n- Corrected the HUD waiting message so ordinary item switching is no longer described as Servux hand confirmation.\n- Gave filling and fluid removal their own area-selection scope options: the whole selection, below the player, or above the player. Existing settings remain compatible, and the global visible-layer restriction still applies.\n- Separated scan height filtering from GUI selection types while preserving live configuration changes and existing scan-range behavior.\n\n<!-- mapped-printer-1.1.3 -->\n## Minecraft 1.21 mapped builds\n\n- Fabric / Java 21 builds: `litematica-printer-1.1.3+1.21.jar`, `litematica-printer-1.1.3+1.21.2.jar`, `litematica-printer-1.1.3+1.21.10.jar`.\n- These builds preserve upstream 1.1.3 placement behavior, including the saved local-prediction / packet-placement setting. An experimental automatic prediction change is not included.\n- Mapped API adapters include the upstream 1.1.3 ice-to-water and repeated-coordinate fixes, source bubble-column preservation and height-filter options.\n- Validation covers native production clients, real Quick Shulker v3/v4, optional ChainVein, two released bedrock miners and real Servux on a dedicated server with 15% bidirectional loss.\n- Known limitation: an unchanged-upstream Minecraft 1.21.10 default-cooldown stress run recorded two wrong server blocks despite correct held-item confirmation. A controlled dropped-placement regression also reproduces phantom support blocks. This remains under investigation; the experimental behavioral change is retained separately and is not shipped here. Passing later or different-parameter runs do not erase the failing record.\n- The 1.21 and 1.21.2 specified loss cases passed; the tests do not require full convergence under random loss.\n\nSource implementation: [mapped upstream 1.1.3](https://github.com/water2004/litematica-printer/tree/c4183893ede1c66cfbce7bd1f286b89cedb8189b). [Build and core tests](https://github.com/water2004/litematica-printer/actions/runs/39617655661).\n\n<!-- dory-verified-1.21.1 -->\n## Verified Minecraft 1.21.1 mapped build\n\n`litematica-printer-1.1.3+1.21.1.jar` — Fabric / Java 21.\n\nValidation includes production survival clients, genuine Quick Shulker v3/v4 and vanilla/Fabric TCP clients, standalone/direct/legacy server cases, two released bedrock miners, and a dedicated-server 15% bidirectional-loss case. The Servux hand-confirmation case requires zero wrong server blocks and no persistent direct-API busy state. The 800-tick workload uses at most 160 drain ticks; complete random-loss convergence is not required.\n\nPrinter ports preserve upstream 1.1.3 placement behavior. Source: [a8a70bb](https://github.com/water2004/litematica-printer/tree/a8a70bbec989fbcda7e7a1631af502131f4ed597). [Pinned CI](https://github.com/water2004/litematica-printer/actions/runs/39723425455).\n<!-- /dory-verified-1.21.1 -->\n\n<!-- dory-verified-1.21.3 -->\n## Verified Minecraft 1.21.3 mapped build\n\n`litematica-printer-1.1.3+1.21.3.jar` — Fabric / Java 21.\n\nValidation includes production survival clients, genuine Quick Shulker v3/v4 and vanilla/Fabric TCP clients, standalone/direct/legacy server cases, two released bedrock miners, and a dedicated-server 15% bidirectional-loss case. The Servux hand-confirmation case requires zero wrong server blocks and no persistent direct-API busy state. The 800-tick workload uses at most 160 drain ticks; complete random-loss convergence is not required.\n\nPrinter ports preserve upstream 1.1.3 placement behavior. Source: [a8a70bb](https://github.com/water2004/litematica-printer/tree/a8a70bbec989fbcda7e7a1631af502131f4ed597). [Pinned CI](https://github.com/water2004/litematica-printer/actions/runs/39723425455).\n<!-- /dory-verified-1.21.3 -->\n\n<!-- dory-verified-1.21.4 -->\n## Verified Minecraft 1.21.4 mapped build\n\n`litematica-printer-1.1.3+1.21.4.jar` — Fabric / Java 21.\n\nValidation includes production survival clients, genuine Quick Shulker v3/v4 and vanilla/Fabric TCP clients, standalone/direct/legacy server cases, two released bedrock miners, and a dedicated-server 15% bidirectional-loss case. The Servux hand-confirmation case requires zero wrong server blocks and no persistent direct-API busy state. The 800-tick workload uses at most 160 drain ticks; complete random-loss convergence is not required.\n\nPrinter ports preserve upstream 1.1.3 placement behavior. Source: [a8a70bb](https://github.com/water2004/litematica-printer/tree/a8a70bbec989fbcda7e7a1631af502131f4ed597). [Pinned CI](https://github.com/water2004/litematica-printer/actions/runs/39723425455).\n<!-- /dory-verified-1.21.4 -->\n\n<!-- dory-verified-1.21.5 -->\n## Verified Minecraft 1.21.5 mapped build\n\n`litematica-printer-1.1.3+1.21.5.jar` — Fabric / Java 21.\n\nValidation includes production survival clients, genuine Quick Shulker v3/v4 and vanilla/Fabric TCP clients, standalone/direct/legacy server cases, two released bedrock miners, and a dedicated-server 15% bidirectional-loss case. The Servux hand-confirmation case requires zero wrong server blocks and no persistent direct-API busy state. The 800-tick workload uses at most 160 drain ticks; complete random-loss convergence is not required.\n\nPrinter ports preserve upstream 1.1.3 placement behavior. Source: [7bb1ac0](https://github.com/water2004/litematica-printer/tree/7bb1ac0f400c3a34310c5ad7afffc7ef411c6491). [Pinned CI](https://github.com/water2004/litematica-printer/actions/runs/39731945459).\n<!-- /dory-verified-1.21.5 -->\n\n<!-- dory-verified-1.21.6 -->\n## Verified Minecraft 1.21.6 mapped build\n\n`litematica-printer-1.1.3+1.21.6.jar` — Fabric / Java 21.\n\nValidation includes production survival clients, genuine Quick Shulker v3/v4 and vanilla/Fabric TCP clients, standalone/direct/legacy server cases, two released bedrock miners, and a dedicated-server 15% bidirectional-loss case. The Servux hand-confirmation case requires zero wrong server blocks and no persistent direct-API busy state. The 800-tick workload uses at most 160 drain ticks; complete random-loss convergence is not required.\n\nPrinter ports preserve upstream 1.1.3 placement behavior. Source: [7bb1ac0](https://github.com/water2004/litematica-printer/tree/7bb1ac0f400c3a34310c5ad7afffc7ef411c6491). [Pinned CI](https://github.com/water2004/litematica-printer/actions/runs/39731945459).\n<!-- /dory-verified-1.21.6 -->\n\n<!-- dory-verified-1.21.7 -->\n## Minecraft 1.21.7 mapped build — known printer packet-loss failure\n\n`litematica-printer-1.1.3+1.21.7.jar` — Fabric / Java 21.\n\n**The unchanged-upstream Printer 1.1.3 combination failed the strict 15% bidirectional-loss test with Servux hand confirmation enabled: 2 wrong server blocks.** Material totals remained conserved and the direct API did not remain busy. This failed check remains a known limitation; it is not counted as a passing acceptance result. The experimental prediction change is not included.\n\nOrdinary production survival clients, genuine v3/v4 and vanilla/Fabric TCP clients, companion unit/server cases and both released bedrock miners passed. The source preserves upstream placement behavior. Further ghost-support investigation is deferred.\n\nSource: [7bb1ac0](https://github.com/water2004/litematica-printer/tree/7bb1ac0f400c3a34310c5ad7afffc7ef411c6491). [Compilation and applicable CI checks](https://github.com/water2004/litematica-printer/actions/runs/39731945459).\n<!-- /dory-verified-1.21.7 -->\n\n<!-- dory-verified-1.21.8 -->\n## Verified Minecraft 1.21.8 mapped build\n\n`litematica-printer-1.1.3+1.21.8.jar` — Fabric / Java 21.\n\nValidation includes production survival clients, genuine Quick Shulker v3/v4 and vanilla/Fabric TCP clients, standalone/direct/legacy server cases, two released bedrock miners, and a dedicated-server 15% bidirectional-loss case. The Servux hand-confirmation case requires zero wrong server blocks and no persistent direct-API busy state. The 800-tick workload uses at most 160 drain ticks; complete random-loss convergence is not required.\n\nPrinter ports preserve upstream 1.1.3 placement behavior. Source: [7bb1ac0](https://github.com/water2004/litematica-printer/tree/7bb1ac0f400c3a34310c5ad7afffc7ef411c6491). [Pinned CI](https://github.com/water2004/litematica-printer/actions/runs/39731945459).\n<!-- /dory-verified-1.21.8 -->\n\n<!-- dory-verified-1.21.9 -->\n## Minecraft 1.21.9 mapped build — known printer packet-loss failure\n\n`litematica-printer-1.1.3+1.21.9.jar` — Fabric / Java 21.\n\n**The unchanged-upstream Printer 1.1.3 combination failed the strict 15% bidirectional-loss test with Servux hand confirmation enabled: 4 wrong server blocks.** Material totals remained conserved and the direct API did not remain busy. This failed check remains a known limitation; it is not counted as a passing acceptance result. The experimental prediction change is not included.\n\nOrdinary production survival clients, genuine v3/v4 and vanilla/Fabric TCP clients, companion unit/server cases and both released bedrock miners passed. The source preserves upstream placement behavior. Further ghost-support investigation is deferred.\n\nSource: [7bb1ac0](https://github.com/water2004/litematica-printer/tree/7bb1ac0f400c3a34310c5ad7afffc7ef411c6491). [Compilation and applicable CI checks](https://github.com/water2004/litematica-printer/actions/runs/39731945459).\n<!-- /dory-verified-1.21.9 -->\n",
+    "draft": false,
+    "prerelease": false,
+    "assets": [
+      {
+        "id": 664733819,
+        "name": "litematica-printer-1.1.3+1.21.1.jar",
+        "digest": "sha256:dd49ace25c6af1be0626cf4006deb2dfbbf132083f95ca0a8b67ead4ca8e7273",
+        "size": 808292,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-10-22T05:03:15Z"
+      },
+      {
+        "id": 662912011,
+        "name": "litematica-printer-1.1.3+1.21.10.jar",
+        "digest": "sha256:2e8db8906067d77bf0e557b1a2eb66e8f05d35c03645b21ab7036f824aa1e3f1",
+        "size": 808887,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-10-21T15:18:51Z"
+      },
+      {
+        "id": 662911953,
+        "name": "litematica-printer-1.1.3+1.21.2.jar",
+        "digest": "sha256:cf5eb88bee0bc8df353150c6de33a73b08566691479506331581162ae5d3cf0c",
+        "size": 808401,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-10-21T15:18:50Z"
+      },
+      {
+        "id": 664861657,
+        "name": "litematica-printer-1.1.3+1.21.3.jar",
+        "digest": "sha256:0665f1e2bf6603d80ce6d045cabca8f83d172cece787a3d10c170fb0d436f554",
+        "size": 808399,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-10-22T06:08:30Z"
+      },
+      {
+        "id": 664889226,
+        "name": "litematica-printer-1.1.3+1.21.4.jar",
+        "digest": "sha256:ad1f1a113f4b891078da4d580cda828030517797a92a54b5dd772dee26cd2fba",
+        "size": 808402,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-10-22T06:22:18Z"
+      },
+      {
+        "id": 664984700,
+        "name": "litematica-printer-1.1.3+1.21.5.jar",
+        "digest": "sha256:68432b45661ec0a6b46d445753e3d22a4144648ac5c75aa132477c3f05c1fb34",
+        "size": 809344,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-10-22T07:01:24Z"
+      },
+      {
+        "id": 664989596,
+        "name": "litematica-printer-1.1.3+1.21.6.jar",
+        "digest": "sha256:0e5837be51b10036f6961a251152d786f07a6bd577efcc6a649f65d5231d91b8",
+        "size": 808885,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-10-22T07:03:31Z"
+      },
+      {
+        "id": 664992892,
+        "name": "litematica-printer-1.1.3+1.21.7.jar",
+        "digest": "sha256:1d563ab9781e168d328eb673fd09f264524c69428b251a2875b528dc8b8401dc",
+        "size": 808883,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-10-22T07:04:59Z"
+      },
+      {
+        "id": 664997010,
+        "name": "litematica-printer-1.1.3+1.21.8.jar",
+        "digest": "sha256:601ce793aa30f51b563824f684bb221e56b24701073ce0c0ec0c47c0df92c6e9",
+        "size": 808883,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-10-22T07:06:43Z"
+      },
+      {
+        "id": 665001919,
+        "name": "litematica-printer-1.1.3+1.21.9.jar",
+        "digest": "sha256:23bb32818a79e0cf17aec850dec50f2eee0b537a93cb5115376295be22273126",
+        "size": 808887,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-10-22T07:08:41Z"
+      },
+      {
+        "id": 662911918,
+        "name": "litematica-printer-1.1.3+1.21.jar",
+        "digest": "sha256:b83c47f87126b4dea60c2a2c1be91ead5ee1ae22c25e11c4bb66eaf9aced3924",
+        "size": 808291,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-10-21T15:18:49Z"
+      },
+      {
+        "id": 656976649,
+        "name": "litematica-printer-1.1.3+26.1.2.jar",
+        "digest": "sha256:9cf229827d91383f047d0d737b2f5683006bf02a4ad42bd5f1a949ab5a0db3d9",
+        "size": 799840,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-10-19T17:45:18Z"
+      },
+      {
+        "id": 656976641,
+        "name": "litematica-printer-1.1.3+26.2.jar",
+        "digest": "sha256:bbc7f67990aaec585cfe24f37156f7949c35d8564d43630c416a1a21abf09b36",
+        "size": 816039,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-10-19T17:45:18Z"
+      },
+      {
+        "id": 656976655,
+        "name": "litematica-printer-1.1.3+26.3.jar",
+        "digest": "sha256:131a573906ea79dd2c5e2d46c1d51e8770b408d6c1b8231362ce5a6ce3a51c53",
+        "size": 817035,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-10-19T17:45:18Z"
+      }
+    ]
+  },
+  {
+    "id": 397155846,
+    "tag_name": "v1.1.2",
+    "target_commitish": "main",
+    "name": "Litematica Printer 4th v1.1.2",
+    "body": "# Litematica Printer 4th 1.1.2\r\n\r\n- Fixed a full-inventory stall when QuickShulker's Direct API exhausts its material-return retries. A finished network request no longer causes the printer to forget material that still needs to be returned. Once connectivity recovers, the printer can free an inventory slot, retrieve the next material, and continue placing blocks without manual intervention.\r\n- Partial returns retain the remaining work. Lost response packets after a successful server transfer are handled using the current synchronized inventory rather than blindly repeating the old operation.\r\n- Return candidates are checked in a bounded rotation, so an unavailable original box does not prevent another eligible material from being returned.\r\n- Includes the 26.1.2/26.2 Servux hand-confirmation gate fix previously distributed separately: enabling printer hand confirmation also enables the required handler-level entity-data requests, without changing Litematica's saved setting. This does not add cross-version Servux protocol compatibility.\r\n\r\nQuickShulker's public API, Legacy integration, and dependency requirements are unchanged. This is not a general fix for every packet-loss or ghost-block scenario.\n\n<!-- mapped-1.21.10-download -->\n## Minecraft 1.21.10 download\n\n- Fabric / Java 21: `litematica-printer-1.1.2+1.21.10.jar`\n- Artifact filenames use `mod-version+minecraft.jar`.\n",
+    "draft": false,
+    "prerelease": false,
+    "assets": [
+      {
+        "id": 635802893,
+        "name": "litematica-printer-1.1.2+1.21.1.jar",
+        "digest": "sha256:10bdee7d955a83b2ef9c0ed3aa32ee8423f4c9145c5cecaff074430c188245c6",
+        "size": 792755,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-10-13T03:48:21Z"
+      },
+      {
+        "id": 662179546,
+        "name": "litematica-printer-1.1.2+1.21.10.jar",
+        "digest": "sha256:7fda5aba7385db2b9e44df5cfb0b9ecf644de09e7ed3f4d034502abc2ad2c179",
+        "size": 793364,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-10-21T10:46:04Z"
+      },
+      {
+        "id": 590259951,
+        "name": "litematica-printer-1.1.2+26.1.2.jar",
+        "digest": "sha256:7442cfb5a4113b21cedfe8c897329d335d0dbe8879a9328b8f18e11f3a806094",
+        "size": 794897,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-09-26T08:26:49Z"
+      },
+      {
+        "id": 590259949,
+        "name": "litematica-printer-1.1.2+26.2.jar",
+        "digest": "sha256:cb9e20c29b916c980e732b76c12f97620b1338feac71584c2a5a5bbf72d8af47",
+        "size": 811080,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-09-26T08:26:49Z"
+      },
+      {
+        "id": 590259952,
+        "name": "litematica-printer-1.1.2+26.3.jar",
+        "digest": "sha256:83ab4bc2db4ff52034a6be97da3adb4c54455a3ca86e5a45219080c837a90bad",
+        "size": 812000,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-09-26T08:26:49Z"
+      }
+    ]
+  },
+  {
+    "id": 395857298,
+    "tag_name": "v1.1.1",
+    "target_commitish": "main",
+    "name": "Litematica Printer 4th v1.1.1",
+    "body": "## Hotfix 1 for Minecraft 26.1.2 and 26.2 (added September 26, 2026)\r\n\r\n**Use the hotfix.1 jar for Minecraft 26.1.2 or 26.2.** The original 1.1.1 jars remain attached for reference. Minecraft 26.3 is unchanged; use its existing 1.1.1 jar.\r\n\r\n- 26.1.2: litematica-printer-1.1.1-hotfix.1+26.1.2.jar\r\n- 26.2: litematica-printer-1.1.1-hotfix.1+26.2.jar\r\n\r\n**Fix:** With the printer's Servux hand-confirmation option enabled and Litematica's own entity-data sync disabled, newer Litematica builds could suppress the metadata/entity requests needed to confirm the server-held item. Printing would then wait indefinitely. The printer now opens Litematica's handler-level request gate while that option is enabled, without changing Litematica's saved setting or duplicating its v1/v2 protocol handling. Printing actions and other modes are unchanged.\r\n\r\n---\r\n\r\n# Litematica Printer 4th 1.1.1\r\n\r\nThis release adds Minecraft 26.3 support and corrects bedrock-miner compatibility and documentation relative to 1.1.0.\r\n\r\n## Changes since 1.1.0\r\n\r\n- Added a dedicated Minecraft 26.3 build, using version-specific dependencies and the same printer behavior as the existing 26.1.2 and 26.2 builds.\r\n- Added support for the original Fabric-Bedrock-Miner 2.x (`bedrock-miner`) through its `BreakingFlowController` client API. It is a different mod from bunnyi116's Bedrock Miner (`bedrockminer`), which was already supported.\r\n- Preserved the existing bunnyi116 Bedrock Miner and BlockMiner (`blockminer`) adapters. When an installed miner's API cannot be resolved, the printer now reports an incompatible integration instead of incorrectly saying no miner is installed; adapter failures are logged.\r\n- Corrected the supported-mod names and links in the English and Chinese READMEs and updated the in-game messages.\r\n- Added end-to-end client GameTests using released miner jars. They verify that the integrated server actually sees the target bedrock become air: all three miners on 26.1.2 and 26.2, and the original Fabric-Bedrock-Miner plus BlockMiner on 26.3. bunnyi116 has not published a 26.3 jar.\r\n\r\n## Downloads\r\n\r\n- `litematica-printer-1.1.1+26.1.2.jar`\r\n- `litematica-printer-1.1.1+26.2.jar`\r\n- `litematica-printer-1.1.1+26.3.jar`\r\n\r\nRequired dependencies: Fabric API, MaLiLib, and Litematica. The original Fabric-Bedrock-Miner 2.x additionally requires Fabric Language Kotlin. Install only one matching bedrock-mining mod for the optional bedrock-breaking mode.\r\n",
+    "draft": false,
+    "prerelease": false,
+    "assets": [
+      {
+        "id": 586318576,
+        "name": "litematica-printer-1.1.1+26.1.2.jar",
+        "digest": "sha256:ac33d5a15395a4aa1a4b7987901e6ad27de57bf889a231e26050a60bac386182",
+        "size": 794772,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-09-24T16:09:47Z"
+      },
+      {
+        "id": 586318574,
+        "name": "litematica-printer-1.1.1+26.2.jar",
+        "digest": "sha256:b2d7464a06c6d16953c353babef013a26715dc52753c8b8348d0082e157d6eb9",
+        "size": 810953,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-09-24T16:09:47Z"
+      },
+      {
+        "id": 586318572,
+        "name": "litematica-printer-1.1.1+26.3.jar",
+        "digest": "sha256:6cee1d84ee55e49a14f21720a1df75c4262a8b07c8ec76d086de757e2dc90e86",
+        "size": 811918,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-09-24T16:09:47Z"
+      },
+      {
+        "id": 588932627,
+        "name": "litematica-printer-1.1.1-hotfix.1+26.1.2.jar",
+        "digest": "sha256:1249e68571a77c5f1952737d02b4f461ecb79d86d89d31b31c1a62654c9291f8",
+        "size": 795015,
+        "uploader": "water2004",
+        "created_at": "2026-09-25T18:05:56Z"
+      },
+      {
+        "id": 588932324,
+        "name": "litematica-printer-1.1.1-hotfix.1+26.2.jar",
+        "digest": "sha256:097adcdff916c1253e235a1387c262a081594846889015b6ef25afcb2736d1bb",
+        "size": 811196,
+        "uploader": "water2004",
+        "created_at": "2026-09-25T18:05:45Z"
+      }
+    ]
+  },
+  {
+    "id": 382859537,
+    "tag_name": "v1.1.0",
+    "target_commitish": "main",
+    "name": "Litematica Printer 4th v1.1.0",
+    "body": "# Litematica Printer 4th 1.1.0\r\n\r\nThis stable release consolidates every change made since 1.0.0 for Minecraft 26.1.2 and 26.2. It focuses on faster continuous discovery, predictable producer-consumer behavior, server-aware item switching, maintainable optional integrations, and substantially broader automated coverage.\r\n\r\n## Highlights since 1.0.0\r\n\r\n### Faster continuous scanning\r\n\r\n- GUI statistics and printer discovery now share compatible search plans and immutable snapshot data instead of independently reading overlapping world and schematic regions.\r\n- Work-range shapes and schematic or selection bounds are compiled into reusable masks, so worker tasks begin inside the active search space rather than filtering a surrounding cube coordinate by coordinate.\r\n- Snapshot pages are compact, shared, streamed, and released after their final dependent task.\r\n- Search cursors use packed coordinates and create `BlockPos` objects only for positions that become jobs.\r\n- Common immutable placement metadata is reused instead of being allocated for every candidate action.\r\n- Completed HUD progress is published separately from the producer's in-flight progress, so the displayed completion percentage remains stable while the player and world are unchanged.\r\n\r\n### Item switching and optional integrations\r\n\r\n- Inventory and hotbar changes now wait for their configured confirmation path before printing resumes.\r\n- Added optional Servux-backed server-authoritative main-hand confirmation, with a visible wait state when confirmation is unavailable or pending.\r\n- Reworked Quick Shulker support behind isolated direct and legacy bridges. Quick Shulker 4.0 uses the screen-independent protocol; compatible 3.x releases retain the legacy screen path.\r\n- Remote shulker work now exposes explicit waiting and lifecycle states instead of racing material delivery.\r\n- ChainVeinFabric remains the optional executor for wrong-block, extra-block, and ice-to-water breaking jobs. Printing continues normally when it is absent, while destructive jobs remain disabled.\r\n- Bedrock jobs are capability-detected for the supported Fabric-Bedrock-Miner and Block-Miner integrations.\r\n\r\n### Scheduling and feedback\r\n\r\n- The continuous producer remains independent from a waiting or rate-limited consumer.\r\n- Compatible jobs remain grouped for same-kind batch execution, while bucket traversal prevents one skipped or unavailable job from starving unrelated work.\r\n- Stale producer results are revalidated against the live world immediately before consumption.\r\n- The HUD reports current work, search, hand, shulker, container, world-update, and lag waits together with the current job and pool length.\r\n- Cycling modes never enables the global work switch, and pausing the work switch preserves producer and consumer state.\r\n- Producer discovery and consumer validation use the same Litematica visible-layer rules.\r\n\r\n## Performance compared with 1.0.0\r\n\r\nA fresh A/B run was performed on the same development system with Minecraft 26.2, the same 531,441-position mixed fixture, four search threads, two warm-up rounds, and seven measured complete GUI + printer scan rounds for each version.\r\n\r\n- 1.0.0 median: `457.45 ms`\r\n- 1.1.0 median: `45.59 ms`\r\n- Improvement: approximately `10.0x` faster, or `90.0%` less scan time\r\n\r\nThe instrumented regression fixture also reduced world and schematic state reads from `8,001,504` in the 1.0.0 scan architecture to `1,228,250` per complete round (`-84.7%`). The permanent mixed-schematic regression still discovers the same `65,229` jobs with the same fingerprint, including its ice-to-water phase job.\r\n\r\nThese figures measure producer scanning rather than configured placement throughput. End-to-end printing is still intentionally governed by per-tick action limits, work intervals, server behavior, latency, and installed mods; results on other systems will vary.\r\n\r\n## Correctness and compatibility coverage\r\n\r\n- Added a large mixed-schematic scan regression and an 82-case action fingerprint covering directional placement, log placement followed by stripping, state adjustment, breaking, fluid handling, and ice-to-water behavior.\r\n- Added a full-print regression that places and verifies a 1,026-block mixed schematic.\r\n- Added stale-job, fill, fluid removal, bedrock integration, Litematica version, Servux confirmation, Quick Shulker lifecycle, legacy/direct protocol, stress, and packet-loss tests.\r\n- Release CI tests both Minecraft 26.1.2 and 26.2 across ChainVein present/absent, Quick Shulker direct/legacy/absent, Servux protocol, supported bedrock miners, and declared Litematica compatibility versions before publishing.\r\n\r\n## Downloads\r\n\r\n- `litematica-printer-1.1.0+26.1.2.jar`\r\n- `litematica-printer-1.1.0+26.2.jar`\r\n\r\nRequired dependencies: Fabric API, MaLiLib, and Litematica.\r\n\r\nOptional integrations: ChainVeinFabric, Quick Shulker/AxShulkers/TakeItOut, Servux, and a supported bedrock-mining mod. Quick Shulker users should use matching client and server releases; the direct path in this release is tested with Quick Shulker 4.0.0.\r\n",
+    "draft": false,
+    "prerelease": false,
+    "assets": [
+      {
+        "id": 544571459,
+        "name": "litematica-printer-1.1.0+26.1.2.jar",
+        "digest": "sha256:2819823f165707de206113adf5eb5bfb804c9c7c8068fea6153e563487d80f6a",
+        "size": 793066,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-09-04T16:05:41Z"
+      },
+      {
+        "id": 544571458,
+        "name": "litematica-printer-1.1.0+26.2.jar",
+        "digest": "sha256:0ab6e997c5651c5ff0171652f27d24b6e6bcb12187952f6b2eb9951d9e6eb7e6",
+        "size": 809249,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-09-04T16:05:41Z"
+      },
+      {
+        "id": 579726481,
+        "name": "litematica-printer-1.1.0+26.3.jar",
+        "digest": "sha256:575a5aeaf60fceeb29b43e57b8530f7fd2634d153a87c612d14aa137497dc206",
+        "size": 810404,
+        "uploader": "water2004",
+        "created_at": "2026-09-21T19:37:29Z"
+      }
+    ]
+  },
+  {
+    "id": 381525091,
+    "tag_name": "v1.1.0-alpha.3",
+    "target_commitish": "main",
+    "name": "Litematica Printer 4th v1.1.0-alpha.3",
+    "body": "# Litematica Printer 4th 1.1.0-alpha.3\n\nThis prerelease contains the complete set of scanning optimizations made after alpha.2 on Minecraft 26.1.2 and 26.2. It reduces scan time, main-thread snapshot work, and temporary allocation without changing printer action semantics.\n\n## Changes since alpha.2\n\n### Compiled search geometry\n\n- Replaced the fixed `8 x 8 x 8` coordinate-generation path with reusable compiled masks for the configured range shape.\n- Compiled schematic and selection workspaces into the search plan instead of repeatedly performing the same high-level spatial checks for every coordinate.\n- Split valid search space into small adaptive leaf tasks, retaining fine-grained worker parallelism while avoiding work outside the active shape and workspace.\n- Kept visible-layer filtering identical between producer discovery and consumer validation.\n\n### Lower-allocation scanning\n\n- Replaced per-search-task coordinate, block-state, and target-mask arrays with cursors that stream directly from immutable shared snapshot pages.\n- Made compatible GUI and printer requests share one compiled task plan while continuing to reuse the shared snapshot pages introduced in alpha.2.\n- Replaced boxed page keys and reference-count maps with packed page coordinates and explicit page lifetimes.\n- Reused the calculated page index for current-world and schematic reads at each position.\n- Delayed `BlockPos` creation until a position actually produces a job.\n- Reused immutable default action-side data instead of allocating it for every discovered action.\n\n### Correctness coverage\n\n- Added regression coverage proving that stale producer results are revalidated against the live world before the consumer acts.\n- Added explicit ice-to-water coverage through ChainVeinFabric while leaving the existing print action implementations unchanged.\n- Preserved continuous producer scanning, producer/consumer independence, visible-layer behavior, and the existing special actions such as directional placement, log stripping, breaking, fluid handling, and ice-to-water conversion.\n\n## Performance compared with alpha.2\n\nThe comparison below uses the same 531,441-position mixed-schematic fixture and development system reported in the alpha.2 release notes. Seven alpha.3 rounds were measured and the median was used.\n\n- Median complete GUI + printer scan time decreased from alpha.2's `169.4 ms` to alpha.3's `40.0 ms` (`-76.4%`).\n- World and schematic state reads decreased from `1,272,112` to `1,228,250` per round (`-3.4%`).\n- The fixed `1,331` alpha.2 search tasks became `4,817` smaller compiled leaf tasks, increasing scheduling granularity without recreating per-task coordinate arrays.\n- The printer result remained identical at `65,229` discovered jobs, including the ice-to-water job and the same job fingerprint.\n\nThe separate full-print regression placed a 1,026-block mixed schematic with all 1,026 blocks correct, no wrong or extra blocks, and no remaining materials. The 82-case printer behavior fingerprint also remained identical.\n\nEnd-to-end print duration is still governed by the configured per-tick placement and time limits. Actual performance varies by system, loaded mods, render distance, and schematic contents.\n\n## Downloads\n\n- `litematica-printer-mc26.1.2-1.1.0-alpha.3+26.1.2.jar`\n- `litematica-printer-mc26.2-1.1.0-alpha.3+26.2.jar`\n\nRequired dependencies: Fabric API, MaLiLib, and Litematica.\n\nOptional dependencies: ChainVeinFabric (block breaking during printing), QuickShulker/AxShulkers (remote shulker access), Servux (server hand-state confirmation), and a supported bedrock-mining mod.\n\nThis is an alpha prerelease. Back up important worlds and report reproducible issues with the client and server logs attached.\n",
+    "draft": false,
+    "prerelease": true,
+    "assets": [
+      {
+        "id": 541663195,
+        "name": "litematica-printer-mc26.1.2-1.1.0-alpha.3+26.1.2.jar",
+        "digest": "sha256:a69a4b842adc7513e491136cef5b48483fd528da6aecd792790d4f9f44fb3461",
+        "size": 793077,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-09-02T19:37:44Z"
+      },
+      {
+        "id": 541663194,
+        "name": "litematica-printer-mc26.2-1.1.0-alpha.3+26.2.jar",
+        "digest": "sha256:bbbb292292515e8e5440da33f07ee40ab3f09090842df2a52b6921ccfc5c983b",
+        "size": 809259,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-09-02T19:37:44Z"
+      }
+    ]
+  },
+  {
+    "id": 380950646,
+    "tag_name": "v1.1.0-alpha.2",
+    "target_commitish": "main",
+    "name": "Litematica Printer 4th v1.1.0-alpha.2",
+    "body": "# Litematica Printer 4th 1.1.0-alpha.2\n\nThis prerelease improves continuous scanning performance and keeps the HUD completion percentage independent from the producer's in-flight scan progress on Minecraft 26.1.2 and 26.2.\n\n## Changes since alpha.1\n\n- Kept fine-grained `8 x 8 x 8` search tasks for worker parallelism while separating them from snapshot storage.\n- Added reference-counted snapshot pages shared across the GUI and printer producer. Overlapping task halos and modules no longer read the same world and schematic positions repeatedly within one scan round.\n- Released shared pages as soon as their final dependent task completes, avoiding a monolithic full-range snapshot.\n- Changed HUD completion statistics to publish as one immutable result only after a complete GUI scan round. The completion bar no longer follows the producer's partial scan while the player and world remain unchanged.\n- Corrected ice-to-water phase-two job classification without changing the existing print action implementation.\n- Added a large mixed-schematic performance regression test and an 82-case printer action fingerprint covering placement directions, stripping logs, breaking, fluid handling, ice-to-water behavior, and other special placement rules.\n\n## Performance fixture\n\nOn the 531,441-position mixed schematic used by the regression test:\n\n- World and schematic state reads decreased from `8,001,504` to `1,272,112` per complete GUI + printer round.\n- Median scan time decreased from `589.6 ms` to `169.4 ms` on the development system.\n- Worker granularity remains at `1,331` search tasks instead of being reduced to larger snapshot-sized tasks.\n\nActual performance varies by system, loaded mods, render distance, and schematic contents.\n\n## Downloads\n\n- `litematica-printer-mc26.1.2-1.1.0-alpha.2+26.1.2.jar`\n- `litematica-printer-mc26.2-1.1.0-alpha.2+26.2.jar`\n\nRequired dependencies: Fabric API, MaLiLib, and Litematica.\n\nOptional dependencies: ChainVeinFabric (block breaking during printing), QuickShulker/AxShulkers (remote shulker access), Servux (server hand-state confirmation), and a supported bedrock-mining mod.\n\nThis is an alpha prerelease. Back up important worlds and report reproducible issues with the client and server logs attached.\n",
+    "draft": false,
+    "prerelease": true,
+    "assets": [
+      {
+        "id": 540526000,
+        "name": "litematica-printer-mc26.1.2-1.1.0-alpha.2+26.1.2.jar",
+        "digest": "sha256:ec6091d0823fa56a9cf0b41d90c43dc72be24034842fd7237dbc01fbf7e6180c",
+        "size": 776833,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-09-02T03:04:22Z"
+      },
+      {
+        "id": 540525998,
+        "name": "litematica-printer-mc26.2-1.1.0-alpha.2+26.2.jar",
+        "digest": "sha256:3ae66fc01aaad952d40e1b575b102aa07c6ee1e1802d55c24794541a1f3e9d74",
+        "size": 790399,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-09-02T03:04:22Z"
+      }
+    ]
+  },
+  {
+    "id": 379090003,
+    "tag_name": "v1.1.0-alpha.1",
+    "target_commitish": "main",
+    "name": "Litematica Printer 4th v1.1.0-alpha.1",
+    "body": "# Litematica Printer 4th 1.1.0-alpha.1\n\nThis prerelease focuses on reliable scheduling, inventory integration, diagnostics, and automated compatibility testing for Minecraft 26.1.2 and 26.2.\n\n## Highlights\n\n- Added the new screen-independent QuickShulker transfer path, with capability detection performed before printing starts.\n- Kept the legacy QuickShulker integration as a separate, internally encapsulated compatibility path.\n- Improved blocking item switching and shulker retrieval so printing waits for the selected material instead of racing inventory synchronization.\n- Added detailed HUD status reporting for searching, printing, hand confirmation, shulker access, container closure, look adjustment, and world updates.\n- Preserved producer and consumer state when the printer work switch is disabled.\n- Prevented print mode rotation and Ctrl handling from enabling the global work switch automatically.\n- Fixed fluid removal with supported placement so falling blocks replace the fluid target directly instead of being placed above it and potentially duplicated.\n- Expanded Litematica compatibility coverage and added integration tests for optional ChainVein, QuickShulker, Servux protocol confirmation, bedrock-mining mods, and simulated packet loss.\n\n## QuickShulker compatibility\n\n- New protocol: QuickShulker `4.0.0-alpha.1` for the matching Minecraft version.\n- Legacy protocol: QuickShulker `3.0.4` remains supported.\n- QuickShulker is optional; normal inventory printing continues to work when it is not installed.\n\n## Downloads\n\n- `litematica-printer-mc26.1.2-1.1.0-alpha.1+26.1.2.jar`\n- `litematica-printer-mc26.2-1.1.0-alpha.1+26.2.jar`\n\nRequired dependencies: Fabric API, MaLiLib, and Litematica.\n\nOptional dependencies: ChainVeinFabric (block breaking during printing), QuickShulker/AxShulkers (remote shulker access), Servux (server hand-state confirmation), and a supported bedrock-mining mod.\n\nThis is an alpha prerelease. Back up important worlds and report reproducible issues with the client and server logs attached.\n",
+    "draft": false,
+    "prerelease": true,
+    "assets": [
+      {
+        "id": 535678107,
+        "name": "litematica-printer-mc26.1.2-1.1.0-alpha.1+26.1.2.jar",
+        "digest": "sha256:50bc57b755b37cd536e1f28e200a6f3e9b6042d057805c770d9360aab205f717",
+        "size": 765558,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-08-29T20:14:01Z"
+      },
+      {
+        "id": 535678109,
+        "name": "litematica-printer-mc26.2-1.1.0-alpha.1+26.2.jar",
+        "digest": "sha256:7899e6b68205585576486cc8f1b531861483df829e5e4d12fe43951b44841a00",
+        "size": 772731,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-08-29T20:14:01Z"
+      }
+    ]
+  },
+  {
+    "id": 375827038,
+    "tag_name": "v1.0.1",
+    "target_commitish": "main",
+    "name": "Litematica Printer 4th v1.0.1",
+    "body": "# Litematica Printer 4th 1.0.1\n\nThis patch release replaces the project and in-game mod icon with a clean, flat-color vector design based on the original three-block concept.\n\n## Downloads\n\n- `litematica-printer-mc26.1.2-1.0.1+26.1.2.jar`\n- `litematica-printer-mc26.2-1.0.1+26.2.jar`\n\nRequired dependencies: Fabric API, MaLiLib, and Litematica.\n\nOptional dependencies: ChainVeinFabric 3.0.0 (block breaking during printing), Quick Shulker/AxShulkers (remote shulker access), and Fabric-Bedrock-Miner (bedrock breaking).\n",
+    "draft": false,
+    "prerelease": false,
+    "assets": [
+      {
+        "id": 527841962,
+        "name": "litematica-printer-mc26.1.2-1.0.1+26.1.2.jar",
+        "digest": "sha256:85061dae16ec52deeafa1c7559a361da12061a3a97a69e83814920a3fceace85",
+        "size": 728914,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-08-24T16:05:46Z"
+      },
+      {
+        "id": 527841964,
+        "name": "litematica-printer-mc26.2-1.0.1+26.2.jar",
+        "digest": "sha256:e6c70e264196d6c854129001d027922a3efaddd514a1b059108cbba2922f68df",
+        "size": 734838,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-08-24T16:05:46Z"
+      }
+    ]
+  },
+  {
+    "id": 360561388,
+    "tag_name": "v1.0.0",
+    "target_commitish": "master",
+    "name": "Litematica Printer 4th v1.0.0",
+    "body": "# Litematica Printer 4th 1.0.0\n\n这是投影打印机四改版的首个正式版本，fork 自 [BiliXWhite/litematica-printer](https://github.com/BiliXWhite/litematica-printer)（投影打印机三改版）。\n\n## 主要变化\n\n- 将打印调度重构为持续扫描的生产者与作业池消费者：扫描持续发现缺失、错误和多余方块，消费者按事务类型公平取出并批量处理。\n- 同类放置、使用和破坏作业可以在同一游戏 tick 内批量提交；跳过、失败或已失效的作业均视为已消费，尚未完成的位置会由后续扫描重新加入。\n- 搜索改为基于分块世界快照的异步并发扫描，避免扫描线程直接阻塞客户端主线程，并遵循 Litematica 可见层设置。\n- 所有物品切换及远程容器取物都会等待客户端确认完成后再继续打印，降低材料尚未到手就误判或放置失败的问题。\n- 错误方块、多余方块及破冰统一通过可选的 [ChainVeinFabric 3.0.0](https://github.com/water2004/ChainVeinFabric/releases/tag/v3.0.0) 客户端作业 API 批量提交；未安装 ChainVeinFabric 时不会启用这些破坏功能。\n- 调试 HUD 同时显示生产者扫描进度、作业池长度、消费者状态与当前作业；关闭打印开关不会清空生产者和消费者状态。\n- 保留原有具体打印语义，包括原木放置后去皮、放水、破冰、方块状态调整、填充和破基岩等处理。\n- 删除旧挖掘模式、内置远程大仓和多版本包装器；只发布 Minecraft 26.1.2 与 26.2 的独立 jar。\n- 工程改为 Java 构建逻辑，并拆分为纯 Java `core` 调度层与各 Minecraft 版本的独立适配实现，不再依赖源码预处理和版本 mapping。\n\n## 下载与依赖\n\n请根据 Minecraft 版本下载对应 jar：\n\n- `litematica-printer-mc26.1.2-1.0.0+26.1.2.jar`\n- `litematica-printer-mc26.2-1.0.0+26.2.jar`\n\n必需依赖：Fabric API、MaLiLib、Litematica。\n\n可选依赖：ChainVeinFabric 3.0.0（打印过程中的方块破坏）、Quick Shulker/AxShulkers（远程潜影盒）、Fabric-Bedrock-Miner（破基岩）。\n",
+    "draft": false,
+    "prerelease": false,
+    "assets": [
+      {
+        "id": 505488341,
+        "name": "litematica-printer-mc26.1.2-1.0.0+26.1.2.jar",
+        "digest": "sha256:861903a6691d88cac6ec2ec914c8cd42b77cd5ca0cf63e178432d061d32aae5b",
+        "size": 2365807,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-08-07T18:07:54Z"
+      },
+      {
+        "id": 505488343,
+        "name": "litematica-printer-mc26.2-1.0.0+26.2.jar",
+        "digest": "sha256:739cb28bb2473dbd53098f160cdeaa56475739e6da9f72ce5add6feaaa572411",
+        "size": 2371732,
+        "uploader": "github-actions[bot]",
+        "created_at": "2026-08-07T18:07:54Z"
+      }
+    ]
+  }
+]
+

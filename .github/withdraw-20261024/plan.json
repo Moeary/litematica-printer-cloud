@@ -1,0 +1,421 @@
+{
+  "repository": "water2004/litematica-printer",
+  "branch": "dory/withdraw-1.21-releases-20261024",
+  "actions": [
+    {
+      "action": "remove_assets",
+      "releaseId": 417572852,
+      "tag": "v1.1.3",
+      "assets": [
+        {
+          "id": 664733819,
+          "name": "litematica-printer-1.1.3+1.21.1.jar",
+          "digest": "sha256:dd49ace25c6af1be0626cf4006deb2dfbbf132083f95ca0a8b67ead4ca8e7273",
+          "size": 808292,
+          "uploader": "github-actions[bot]",
+          "created_at": "2026-10-22T05:03:15Z"
+        },
+        {
+          "id": 662912011,
+          "name": "litematica-printer-1.1.3+1.21.10.jar",
+          "digest": "sha256:2e8db8906067d77bf0e557b1a2eb66e8f05d35c03645b21ab7036f824aa1e3f1",
+          "size": 808887,
+          "uploader": "github-actions[bot]",
+          "created_at": "2026-10-21T15:18:51Z"
+        },
+        {
+          "id": 662911953,
+          "name": "litematica-printer-1.1.3+1.21.2.jar",
+          "digest": "sha256:cf5eb88bee0bc8df353150c6de33a73b08566691479506331581162ae5d3cf0c",
+          "size": 808401,
+          "uploader": "github-actions[bot]",
+          "created_at": "2026-10-21T15:18:50Z"
+        },
+        {
+          "id": 664861657,
+          "name": "litematica-printer-1.1.3+1.21.3.jar",
+          "digest": "sha256:0665f1e2bf6603d80ce6d045cabca8f83d172cece787a3d10c170fb0d436f554",
+          "size": 808399,
+          "uploader": "github-actions[bot]",
+          "created_at": "2026-10-22T06:08:30Z"
+        },
+        {
+          "id": 664889226,
+          "name": "litematica-printer-1.1.3+1.21.4.jar",
+          "digest": "sha256:ad1f1a113f4b891078da4d580cda828030517797a92a54b5dd772dee26cd2fba",
+          "size": 808402,
+          "uploader": "github-actions[bot]",
+          "created_at": "2026-10-22T06:22:18Z"
+        },
+        {
+          "id": 664984700,
+          "name": "litematica-printer-1.1.3+1.21.5.jar",
+          "digest": "sha256:68432b45661ec0a6b46d445753e3d22a4144648ac5c75aa132477c3f05c1fb34",
+          "size": 809344,
+          "uploader": "github-actions[bot]",
+          "created_at": "2026-10-22T07:01:24Z"
+        },
+        {
+          "id": 664989596,
+          "name": "litematica-printer-1.1.3+1.21.6.jar",
+          "digest": "sha256:0e5837be51b10036f6961a251152d786f07a6bd577efcc6a649f65d5231d91b8",
+          "size": 808885,
+          "uploader": "github-actions[bot]",
+          "created_at": "2026-10-22T07:03:31Z"
+        },
+        {
+          "id": 664992892,
+          "name": "litematica-printer-1.1.3+1.21.7.jar",
+          "digest": "sha256:1d563ab9781e168d328eb673fd09f264524c69428b251a2875b528dc8b8401dc",
+          "size": 808883,
+          "uploader": "github-actions[bot]",
+          "created_at": "2026-10-22T07:04:59Z"
+        },
+        {
+          "id": 664997010,
+          "name": "litematica-printer-1.1.3+1.21.8.jar",
+          "digest": "sha256:601ce793aa30f51b563824f684bb221e56b24701073ce0c0ec0c47c0df92c6e9",
+          "size": 808883,
+          "uploader": "github-actions[bot]",
+          "created_at": "2026-10-22T07:06:43Z"
+        },
+        {
+          "id": 665001919,
+          "name": "litematica-printer-1.1.3+1.21.9.jar",
+          "digest": "sha256:23bb32818a79e0cf17aec850dec50f2eee0b537a93cb5115376295be22273126",
+          "size": 808887,
+          "uploader": "github-actions[bot]",
+          "created_at": "2026-10-22T07:08:41Z"
+        },
+        {
+          "id": 662911918,
+          "name": "litematica-printer-1.1.3+1.21.jar",
+          "digest": "sha256:b83c47f87126b4dea60c2a2c1be91ead5ee1ae22c25e11c4bb66eaf9aced3924",
+          "size": 808291,
+          "uploader": "github-actions[bot]",
+          "created_at": "2026-10-21T15:18:49Z"
+        }
+      ],
+      "beforeBody": "# Litematica Printer 4th 1.1.3\n\n- Fixed ice-to-water printing above solid ground by following vanilla ice-breaking support conditions. Unsupported air below the target still prevents ice placement for water generation.\n- Fixed stale water-wait state blocking later ice-to-water jobs at the same position. Ice breaking now follows the regular producer-consumer cycle and respects the configured coordinate cooldown.\n- Preserve both upward and downward source-water bubble columns when printing ordinary water sources, instead of replacing them with ice.\n- Corrected the HUD waiting message so ordinary item switching is no longer described as Servux hand confirmation.\n- Gave filling and fluid removal their own area-selection scope options: the whole selection, below the player, or above the player. Existing settings remain compatible, and the global visible-layer restriction still applies.\n- Separated scan height filtering from GUI selection types while preserving live configuration changes and existing scan-range behavior.\n\n<!-- mapped-printer-1.1.3 -->\n## Minecraft 1.21 mapped builds\n\n- Fabric / Java 21 builds: `litematica-printer-1.1.3+1.21.jar`, `litematica-printer-1.1.3+1.21.2.jar`, `litematica-printer-1.1.3+1.21.10.jar`.\n- These builds preserve upstream 1.1.3 placement behavior, including the saved local-prediction / packet-placement setting. An experimental automatic prediction change is not included.\n- Mapped API adapters include the upstream 1.1.3 ice-to-water and repeated-coordinate fixes, source bubble-column preservation and height-filter options.\n- Validation covers native production clients, real Quick Shulker v3/v4, optional ChainVein, two released bedrock miners and real Servux on a dedicated server with 15% bidirectional loss.\n- Known limitation: an unchanged-upstream Minecraft 1.21.10 default-cooldown stress run recorded two wrong server blocks despite correct held-item confirmation. A controlled dropped-placement regression also reproduces phantom support blocks. This remains under investigation; the experimental behavioral change is retained separately and is not shipped here. Passing later or different-parameter runs do not erase the failing record.\n- The 1.21 and 1.21.2 specified loss cases passed; the tests do not require full convergence under random loss.\n\nSource implementation: [mapped upstream 1.1.3](https://github.com/water2004/litematica-printer/tree/c4183893ede1c66cfbce7bd1f286b89cedb8189b). [Build and core tests](https://github.com/water2004/litematica-printer/actions/runs/39617655661).\n\n<!-- dory-verified-1.21.1 -->\n## Verified Minecraft 1.21.1 mapped build\n\n`litematica-printer-1.1.3+1.21.1.jar` — Fabric / Java 21.\n\nValidation includes production survival clients, genuine Quick Shulker v3/v4 and vanilla/Fabric TCP clients, standalone/direct/legacy server cases, two released bedrock miners, and a dedicated-server 15% bidirectional-loss case. The Servux hand-confirmation case requires zero wrong server blocks and no persistent direct-API busy state. The 800-tick workload uses at most 160 drain ticks; complete random-loss convergence is not required.\n\nPrinter ports preserve upstream 1.1.3 placement behavior. Source: [a8a70bb](https://github.com/water2004/litematica-printer/tree/a8a70bbec989fbcda7e7a1631af502131f4ed597). [Pinned CI](https://github.com/water2004/litematica-printer/actions/runs/39723425455).\n<!-- /dory-verified-1.21.1 -->\n\n<!-- dory-verified-1.21.3 -->\n## Verified Minecraft 1.21.3 mapped build\n\n`litematica-printer-1.1.3+1.21.3.jar` — Fabric / Java 21.\n\nValidation includes production survival clients, genuine Quick Shulker v3/v4 and vanilla/Fabric TCP clients, standalone/direct/legacy server cases, two released bedrock miners, and a dedicated-server 15% bidirectional-loss case. The Servux hand-confirmation case requires zero wrong server blocks and no persistent direct-API busy state. The 800-tick workload uses at most 160 drain ticks; complete random-loss convergence is not required.\n\nPrinter ports preserve upstream 1.1.3 placement behavior. Source: [a8a70bb](https://github.com/water2004/litematica-printer/tree/a8a70bbec989fbcda7e7a1631af502131f4ed597). [Pinned CI](https://github.com/water2004/litematica-printer/actions/runs/39723425455).\n<!-- /dory-verified-1.21.3 -->\n\n<!-- dory-verified-1.21.4 -->\n## Verified Minecraft 1.21.4 mapped build\n\n`litematica-printer-1.1.3+1.21.4.jar` — Fabric / Java 21.\n\nValidation includes production survival clients, genuine Quick Shulker v3/v4 and vanilla/Fabric TCP clients, standalone/direct/legacy server cases, two released bedrock miners, and a dedicated-server 15% bidirectional-loss case. The Servux hand-confirmation case requires zero wrong server blocks and no persistent direct-API busy state. The 800-tick workload uses at most 160 drain ticks; complete random-loss convergence is not required.\n\nPrinter ports preserve upstream 1.1.3 placement behavior. Source: [a8a70bb](https://github.com/water2004/litematica-printer/tree/a8a70bbec989fbcda7e7a1631af502131f4ed597). [Pinned CI](https://github.com/water2004/litematica-printer/actions/runs/39723425455).\n<!-- /dory-verified-1.21.4 -->\n\n<!-- dory-verified-1.21.5 -->\n## Verified Minecraft 1.21.5 mapped build\n\n`litematica-printer-1.1.3+1.21.5.jar` — Fabric / Java 21.\n\nValidation includes production survival clients, genuine Quick Shulker v3/v4 and vanilla/Fabric TCP clients, standalone/direct/legacy server cases, two released bedrock miners, and a dedicated-server 15% bidirectional-loss case. The Servux hand-confirmation case requires zero wrong server blocks and no persistent direct-API busy state. The 800-tick workload uses at most 160 drain ticks; complete random-loss convergence is not required.\n\nPrinter ports preserve upstream 1.1.3 placement behavior. Source: [7bb1ac0](https://github.com/water2004/litematica-printer/tree/7bb1ac0f400c3a34310c5ad7afffc7ef411c6491). [Pinned CI](https://github.com/water2004/litematica-printer/actions/runs/39731945459).\n<!-- /dory-verified-1.21.5 -->\n\n<!-- dory-verified-1.21.6 -->\n## Verified Minecraft 1.21.6 mapped build\n\n`litematica-printer-1.1.3+1.21.6.jar` — Fabric / Java 21.\n\nValidation includes production survival clients, genuine Quick Shulker v3/v4 and vanilla/Fabric TCP clients, standalone/direct/legacy server cases, two released bedrock miners, and a dedicated-server 15% bidirectional-loss case. The Servux hand-confirmation case requires zero wrong server blocks and no persistent direct-API busy state. The 800-tick workload uses at most 160 drain ticks; complete random-loss convergence is not required.\n\nPrinter ports preserve upstream 1.1.3 placement behavior. Source: [7bb1ac0](https://github.com/water2004/litematica-printer/tree/7bb1ac0f400c3a34310c5ad7afffc7ef411c6491). [Pinned CI](https://github.com/water2004/litematica-printer/actions/runs/39731945459).\n<!-- /dory-verified-1.21.6 -->\n\n<!-- dory-verified-1.21.7 -->\n## Minecraft 1.21.7 mapped build — known printer packet-loss failure\n\n`litematica-printer-1.1.3+1.21.7.jar` — Fabric / Java 21.\n\n**The unchanged-upstream Printer 1.1.3 combination failed the strict 15% bidirectional-loss test with Servux hand confirmation enabled: 2 wrong server blocks.** Material totals remained conserved and the direct API did not remain busy. This failed check remains a known limitation; it is not counted as a passing acceptance result. The experimental prediction change is not included.\n\nOrdinary production survival clients, genuine v3/v4 and vanilla/Fabric TCP clients, companion unit/server cases and both released bedrock miners passed. The source preserves upstream placement behavior. Further ghost-support investigation is deferred.\n\nSource: [7bb1ac0](https://github.com/water2004/litematica-printer/tree/7bb1ac0f400c3a34310c5ad7afffc7ef411c6491). [Compilation and applicable CI checks](https://github.com/water2004/litematica-printer/actions/runs/39731945459).\n<!-- /dory-verified-1.21.7 -->\n\n<!-- dory-verified-1.21.8 -->\n## Verified Minecraft 1.21.8 mapped build\n\n`litematica-printer-1.1.3+1.21.8.jar` — Fabric / Java 21.\n\nValidation includes production survival clients, genuine Quick Shulker v3/v4 and vanilla/Fabric TCP clients, standalone/direct/legacy server cases, two released bedrock miners, and a dedicated-server 15% bidirectional-loss case. The Servux hand-confirmation case requires zero wrong server blocks and no persistent direct-API busy state. The 800-tick workload uses at most 160 drain ticks; complete random-loss convergence is not required.\n\nPrinter ports preserve upstream 1.1.3 placement behavior. Source: [7bb1ac0](https://github.com/water2004/litematica-printer/tree/7bb1ac0f400c3a34310c5ad7afffc7ef411c6491). [Pinned CI](https://github.com/water2004/litematica-printer/actions/runs/39731945459).\n<!-- /dory-verified-1.21.8 -->\n\n<!-- dory-verified-1.21.9 -->\n## Minecraft 1.21.9 mapped build — known printer packet-loss failure\n\n`litematica-printer-1.1.3+1.21.9.jar` — Fabric / Java 21.\n\n**The unchanged-upstream Printer 1.1.3 combination failed the strict 15% bidirectional-loss test with Servux hand confirmation enabled: 4 wrong server blocks.** Material totals remained conserved and the direct API did not remain busy. This failed check remains a known limitation; it is not counted as a passing acceptance result. The experimental prediction change is not included.\n\nOrdinary production survival clients, genuine v3/v4 and vanilla/Fabric TCP clients, companion unit/server cases and both released bedrock miners passed. The source preserves upstream placement behavior. Further ghost-support investigation is deferred.\n\nSource: [7bb1ac0](https://github.com/water2004/litematica-printer/tree/7bb1ac0f400c3a34310c5ad7afffc7ef411c6491). [Compilation and applicable CI checks](https://github.com/water2004/litematica-printer/actions/runs/39731945459).\n<!-- /dory-verified-1.21.9 -->\n",
+      "afterBody": "# Litematica Printer 4th 1.1.3\n\n- Fixed ice-to-water printing above solid ground by following vanilla ice-breaking support conditions. Unsupported air below the target still prevents ice placement for water generation.\n- Fixed stale water-wait state blocking later ice-to-water jobs at the same position. Ice breaking now follows the regular producer-consumer cycle and respects the configured coordinate cooldown.\n- Preserve both upward and downward source-water bubble columns when printing ordinary water sources, instead of replacing them with ice.\n- Corrected the HUD waiting message so ordinary item switching is no longer described as Servux hand confirmation.\n- Gave filling and fluid removal their own area-selection scope options: the whole selection, below the player, or above the player. Existing settings remain compatible, and the global visible-layer restriction still applies.\n- Separated scan height filtering from GUI selection types while preserving live configuration changes and existing scan-range behavior.",
+      "preserve": [
+        {
+          "id": 656976649,
+          "name": "litematica-printer-1.1.3+26.1.2.jar",
+          "digest": "sha256:9cf229827d91383f047d0d737b2f5683006bf02a4ad42bd5f1a949ab5a0db3d9",
+          "size": 799840,
+          "uploader": "github-actions[bot]",
+          "created_at": "2026-10-19T17:45:18Z"
+        },
+        {
+          "id": 656976641,
+          "name": "litematica-printer-1.1.3+26.2.jar",
+          "digest": "sha256:bbc7f67990aaec585cfe24f37156f7949c35d8564d43630c416a1a21abf09b36",
+          "size": 816039,
+          "uploader": "github-actions[bot]",
+          "created_at": "2026-10-19T17:45:18Z"
+        },
+        {
+          "id": 656976655,
+          "name": "litematica-printer-1.1.3+26.3.jar",
+          "digest": "sha256:131a573906ea79dd2c5e2d46c1d51e8770b408d6c1b8231362ce5a6ce3a51c53",
+          "size": 817035,
+          "uploader": "github-actions[bot]",
+          "created_at": "2026-10-19T17:45:18Z"
+        }
+      ]
+    },
+    {
+      "action": "remove_assets",
+      "releaseId": 397155846,
+      "tag": "v1.1.2",
+      "assets": [
+        {
+          "id": 662179546,
+          "name": "litematica-printer-1.1.2+1.21.10.jar",
+          "digest": "sha256:7fda5aba7385db2b9e44df5cfb0b9ecf644de09e7ed3f4d034502abc2ad2c179",
+          "size": 793364,
+          "uploader": "github-actions[bot]",
+          "created_at": "2026-10-21T10:46:04Z"
+        }
+      ],
+      "beforeBody": "# Litematica Printer 4th 1.1.2\r\n\r\n- Fixed a full-inventory stall when QuickShulker's Direct API exhausts its material-return retries. A finished network request no longer causes the printer to forget material that still needs to be returned. Once connectivity recovers, the printer can free an inventory slot, retrieve the next material, and continue placing blocks without manual intervention.\r\n- Partial returns retain the remaining work. Lost response packets after a successful server transfer are handled using the current synchronized inventory rather than blindly repeating the old operation.\r\n- Return candidates are checked in a bounded rotation, so an unavailable original box does not prevent another eligible material from being returned.\r\n- Includes the 26.1.2/26.2 Servux hand-confirmation gate fix previously distributed separately: enabling printer hand confirmation also enables the required handler-level entity-data requests, without changing Litematica's saved setting. This does not add cross-version Servux protocol compatibility.\r\n\r\nQuickShulker's public API, Legacy integration, and dependency requirements are unchanged. This is not a general fix for every packet-loss or ghost-block scenario.\n\n<!-- mapped-1.21.10-download -->\n## Minecraft 1.21.10 download\n\n- Fabric / Java 21: `litematica-printer-1.1.2+1.21.10.jar`\n- Artifact filenames use `mod-version+minecraft.jar`.\n",
+      "afterBody": "# Litematica Printer 4th 1.1.2\r\n\r\n- Fixed a full-inventory stall when QuickShulker's Direct API exhausts its material-return retries. A finished network request no longer causes the printer to forget material that still needs to be returned. Once connectivity recovers, the printer can free an inventory slot, retrieve the next material, and continue placing blocks without manual intervention.\r\n- Partial returns retain the remaining work. Lost response packets after a successful server transfer are handled using the current synchronized inventory rather than blindly repeating the old operation.\r\n- Return candidates are checked in a bounded rotation, so an unavailable original box does not prevent another eligible material from being returned.\r\n- Includes the 26.1.2/26.2 Servux hand-confirmation gate fix previously distributed separately: enabling printer hand confirmation also enables the required handler-level entity-data requests, without changing Litematica's saved setting. This does not add cross-version Servux protocol compatibility.\r\n\r\nQuickShulker's public API, Legacy integration, and dependency requirements are unchanged. This is not a general fix for every packet-loss or ghost-block scenario.",
+      "preserve": [
+        {
+          "id": 635802893,
+          "name": "litematica-printer-1.1.2+1.21.1.jar",
+          "digest": "sha256:10bdee7d955a83b2ef9c0ed3aa32ee8423f4c9145c5cecaff074430c188245c6",
+          "size": 792755,
+          "uploader": "github-actions[bot]",
+          "created_at": "2026-10-13T03:48:21Z"
+        },
+        {
+          "id": 590259951,
+          "name": "litematica-printer-1.1.2+26.1.2.jar",
+          "digest": "sha256:7442cfb5a4113b21cedfe8c897329d335d0dbe8879a9328b8f18e11f3a806094",
+          "size": 794897,
+          "uploader": "github-actions[bot]",
+          "created_at": "2026-09-26T08:26:49Z"
+        },
+        {
+          "id": 590259949,
+          "name": "litematica-printer-1.1.2+26.2.jar",
+          "digest": "sha256:cb9e20c29b916c980e732b76c12f97620b1338feac71584c2a5a5bbf72d8af47",
+          "size": 811080,
+          "uploader": "github-actions[bot]",
+          "created_at": "2026-09-26T08:26:49Z"
+        },
+        {
+          "id": 590259952,
+          "name": "litematica-printer-1.1.2+26.3.jar",
+          "digest": "sha256:83ab4bc2db4ff52034a6be97da3adb4c54455a3ca86e5a45219080c837a90bad",
+          "size": 812000,
+          "uploader": "github-actions[bot]",
+          "created_at": "2026-09-26T08:26:49Z"
+        }
+      ]
+    },
+    {
+      "action": "draft",
+      "releaseId": 422691551,
+      "tag": "v1.1.4",
+      "target": "9508bec4834b93abd8fbb896af882704b720296c",
+      "assets": [
+        {
+          "id": 672097076,
+          "name": "litematica-printer-1.1.4+1.21.1.jar",
+          "digest": "sha256:9d7ee71cc581f44ddcb8aa28e76646762a56e1ea42007cf58882fdb608843df3",
+          "size": 808296,
+          "uploader": "github-actions[bot]",
+          "created_at": "2026-10-24T11:30:57Z"
+        },
+        {
+          "id": 672097455,
+          "name": "litematica-printer-1.1.4+1.21.10.jar",
+          "digest": "sha256:ec083fb9004ab0ae6ec83cf8fb2ccace85a489da7ba10bbe1b61248915f7e702",
+          "size": 809127,
+          "uploader": "github-actions[bot]",
+          "created_at": "2026-10-24T11:31:06Z"
+        },
+        {
+          "id": 672097108,
+          "name": "litematica-printer-1.1.4+1.21.2.jar",
+          "digest": "sha256:d16734ecf76ce34b3b65ad1594b9f6fe4d615fd305baf7f05a75c325acfc3e0d",
+          "size": 808403,
+          "uploader": "github-actions[bot]",
+          "created_at": "2026-10-24T11:30:58Z"
+        },
+        {
+          "id": 672097155,
+          "name": "litematica-printer-1.1.4+1.21.3.jar",
+          "digest": "sha256:e0c77e3b469fa0a5ace0685eb97a672524aa76308870f0484ede539160cdc992",
+          "size": 808405,
+          "uploader": "github-actions[bot]",
+          "created_at": "2026-10-24T11:30:59Z"
+        },
+        {
+          "id": 672097185,
+          "name": "litematica-printer-1.1.4+1.21.4.jar",
+          "digest": "sha256:5ac2211166fd5d74d33d911551ce394f518716169dfa4d9465fb2fd942aec441",
+          "size": 808405,
+          "uploader": "github-actions[bot]",
+          "created_at": "2026-10-24T11:31:00Z"
+        },
+        {
+          "id": 672097266,
+          "name": "litematica-printer-1.1.4+1.21.5.jar",
+          "digest": "sha256:6983ee9a09a461420cd2bd568f0673e8e759bc0e595e84b0eda3f819440ef0a4",
+          "size": 809349,
+          "uploader": "github-actions[bot]",
+          "created_at": "2026-10-24T11:31:01Z"
+        },
+        {
+          "id": 672097321,
+          "name": "litematica-printer-1.1.4+1.21.6.jar",
+          "digest": "sha256:61fb23251c7901b02163b4ffcfc3c73c95eaf81c08c028765d233d8c9545d7a5",
+          "size": 808891,
+          "uploader": "github-actions[bot]",
+          "created_at": "2026-10-24T11:31:03Z"
+        },
+        {
+          "id": 672097362,
+          "name": "litematica-printer-1.1.4+1.21.7.jar",
+          "digest": "sha256:295b7d4b406a7e728c166fa846df39ebf4e12e37463ec7b1d30b7c56f7628871",
+          "size": 808890,
+          "uploader": "github-actions[bot]",
+          "created_at": "2026-10-24T11:31:03Z"
+        },
+        {
+          "id": 672097398,
+          "name": "litematica-printer-1.1.4+1.21.8.jar",
+          "digest": "sha256:7d53d1584ac413fcf2d3352a0e1659d752dd665987ca4c33866992fc6ae59d31",
+          "size": 808891,
+          "uploader": "github-actions[bot]",
+          "created_at": "2026-10-24T11:31:04Z"
+        },
+        {
+          "id": 672097430,
+          "name": "litematica-printer-1.1.4+1.21.9.jar",
+          "digest": "sha256:811fd7fbd8d32960a440eafd7618c2cd886f47d85b99d6874501ca07c98716db",
+          "size": 808893,
+          "uploader": "github-actions[bot]",
+          "created_at": "2026-10-24T11:31:05Z"
+        },
+        {
+          "id": 672097042,
+          "name": "litematica-printer-1.1.4+1.21.jar",
+          "digest": "sha256:402580e3f3c2385333fdeb015bd267727cca7ecad9a3b2c64582a8cda3afb603",
+          "size": 808295,
+          "uploader": "github-actions[bot]",
+          "created_at": "2026-10-24T11:30:56Z"
+        },
+        {
+          "id": 672097486,
+          "name": "minimum-dependencies-1.1.4-mc1.21-1.21.10.zip",
+          "digest": "sha256:cbf9e067464dccd89c216e37b97c2ef7dd9073c98eebda9d73dc423bf2349e1a",
+          "size": 22227330,
+          "uploader": "github-actions[bot]",
+          "created_at": "2026-10-24T11:31:07Z"
+        },
+        {
+          "id": 672097556,
+          "name": "SHA256SUMS.txt",
+          "digest": "sha256:39147bc9777048e561f6a67776f68f0d5732d923a9ede7e72d14ea9cd6396454",
+          "size": 1321,
+          "uploader": "github-actions[bot]",
+          "created_at": "2026-10-24T11:31:10Z"
+        },
+        {
+          "id": 672097537,
+          "name": "validation-1.1.4.json",
+          "digest": "sha256:7d2fb58b3fd28d29644d6d48de70748de136cf86c12f5028cd45712b820b78a7",
+          "size": 26246,
+          "uploader": "github-actions[bot]",
+          "created_at": "2026-10-24T11:31:09Z"
+        }
+      ]
+    },
+    {
+      "action": "draft",
+      "releaseId": 422699354,
+      "tag": "v1.1.5",
+      "target": "80b2d225f56038e0d9a40f07c151fc965ab8b108",
+      "assets": [
+        {
+          "id": 672132968,
+          "name": "litematica-printer-1.1.5+1.21.1.jar",
+          "digest": "sha256:9458d9b327a3dae2176bca12c973c339292921dbb53315dfa68cb16a90d8a1ce",
+          "size": 808297,
+          "uploader": "github-actions[bot]",
+          "created_at": "2026-10-24T11:46:59Z"
+        },
+        {
+          "id": 672133224,
+          "name": "litematica-printer-1.1.5+1.21.10.jar",
+          "digest": "sha256:8a52d66deb685c9afc2ea1b40cc43a0a9f0effd1a97f08d825e91f883438127f",
+          "size": 809069,
+          "uploader": "github-actions[bot]",
+          "created_at": "2026-10-24T11:47:06Z"
+        },
+        {
+          "id": 672133005,
+          "name": "litematica-printer-1.1.5+1.21.2.jar",
+          "digest": "sha256:c636cf7f9de16a829672f6887f577d4e44c3b903cd0d5b458d0ff886cf3166fd",
+          "size": 808403,
+          "uploader": "github-actions[bot]",
+          "created_at": "2026-10-24T11:47:00Z"
+        },
+        {
+          "id": 672133044,
+          "name": "litematica-printer-1.1.5+1.21.3.jar",
+          "digest": "sha256:1b3c7c664e2ddfc7eff05064e948c28a31dde490c6a1a9b2a57536c218ede1b8",
+          "size": 808404,
+          "uploader": "github-actions[bot]",
+          "created_at": "2026-10-24T11:47:01Z"
+        },
+        {
+          "id": 672133065,
+          "name": "litematica-printer-1.1.5+1.21.4.jar",
+          "digest": "sha256:0ef291b2fecd03293745a345fa61b03b47addb9c4f1526b3e7157f71382d2362",
+          "size": 808405,
+          "uploader": "github-actions[bot]",
+          "created_at": "2026-10-24T11:47:01Z"
+        },
+        {
+          "id": 672133096,
+          "name": "litematica-printer-1.1.5+1.21.5.jar",
+          "digest": "sha256:84ae303f8afbffbdeac3c4b453e5a089733f6a18595a442f60c77fd8be96fa21",
+          "size": 809347,
+          "uploader": "github-actions[bot]",
+          "created_at": "2026-10-24T11:47:02Z"
+        },
+        {
+          "id": 672133120,
+          "name": "litematica-printer-1.1.5+1.21.6.jar",
+          "digest": "sha256:eb3d6fa646acdbc27fbcbadd978c9eff0428a8df94ce433211d7930924e4b31c",
+          "size": 808892,
+          "uploader": "github-actions[bot]",
+          "created_at": "2026-10-24T11:47:03Z"
+        },
+        {
+          "id": 672133145,
+          "name": "litematica-printer-1.1.5+1.21.7.jar",
+          "digest": "sha256:51bf544c00d69e8fc74a7be16c89284349a5707c6096894ac8e463ecd2fe5496",
+          "size": 808890,
+          "uploader": "github-actions[bot]",
+          "created_at": "2026-10-24T11:47:04Z"
+        },
+        {
+          "id": 672133169,
+          "name": "litematica-printer-1.1.5+1.21.8.jar",
+          "digest": "sha256:11ac076ae24efba8b4646d410670b6664c154daf78e3f31c1a07fdf747d9579c",
+          "size": 808892,
+          "uploader": "github-actions[bot]",
+          "created_at": "2026-10-24T11:47:04Z"
+        },
+        {
+          "id": 672133205,
+          "name": "litematica-printer-1.1.5+1.21.9.jar",
+          "digest": "sha256:cb5a629e98b7f5b5b6d2beb8d260756ff4f5fdd82932518660e1c990660a791f",
+          "size": 808894,
+          "uploader": "github-actions[bot]",
+          "created_at": "2026-10-24T11:47:05Z"
+        },
+        {
+          "id": 672132941,
+          "name": "litematica-printer-1.1.5+1.21.jar",
+          "digest": "sha256:caaf53ce1c9dfc2d496cbf5c58cb158daa5f4b1bf7914450b75ae4bee8dc29e4",
+          "size": 808295,
+          "uploader": "github-actions[bot]",
+          "created_at": "2026-10-24T11:46:58Z"
+        },
+        {
+          "id": 672133236,
+          "name": "minimum-dependencies-1.1.5-mc1.21-1.21.10.zip",
+          "digest": "sha256:4a1dbb6449f9faecfe6891ef38cea0df98a88fd2dfe77b109b89dafbc1f96cde",
+          "size": 22227808,
+          "uploader": "github-actions[bot]",
+          "created_at": "2026-10-24T11:47:06Z"
+        },
+        {
+          "id": 672133311,
+          "name": "SHA256SUMS.txt",
+          "digest": "sha256:b61d10dd4ecb576eff79f04fec7da6ae98668be2662209e598bc49837e408048",
+          "size": 1321,
+          "uploader": "github-actions[bot]",
+          "created_at": "2026-10-24T11:47:08Z"
+        },
+        {
+          "id": 672133283,
+          "name": "validation-1.1.5.json",
+          "digest": "sha256:8131e9beb18e88f1ab37845f6ea3a831db92408668f2c76c207ad0bff50f0afa",
+          "size": 28182,
+          "uploader": "github-actions[bot]",
+          "created_at": "2026-10-24T11:47:08Z"
+        }
+      ]
+    }
+  ]
+}
+
