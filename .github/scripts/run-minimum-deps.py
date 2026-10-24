@@ -6,14 +6,38 @@ import os
 import shutil
 import subprocess
 import sys
+import urllib.request
+import time
 ROOT=Path(__file__).resolve().parents[2]
 mc=sys.argv[1]
 minimum=json.loads((ROOT/'.github/minimum-dependencies.json').read_text())[mc]
 original=json.loads((ROOT/'.github/mapped-ci-inputs.json').read_text())
 wrapper=str(Path(os.environ.get('MAPPED_CI_GRADLE', ROOT/'gradlew')).resolve())
 env=os.environ.copy()
+build_logs=ROOT/'.ci/minimum-build-logs'/mc
+build_logs.mkdir(parents=True,exist_ok=True)
 def gradle(folder,*tasks):
-    subprocess.run([wrapper,*tasks,'--no-daemon','--max-workers=2','--console=plain','--stacktrace','-Dorg.gradle.jvmargs=-Xmx2G -Dfile.encoding=UTF-8'],cwd=folder,env=env,check=True)
+    log=build_logs/(folder.parent.name+'-'+str(len(list(build_logs.glob('*.log'))))+'.log')
+    command=[wrapper,*tasks,'--no-daemon','--max-workers=2','--console=plain','--stacktrace','-Dorg.gradle.jvmargs=-Xmx2G -Dfile.encoding=UTF-8']
+    with log.open('w',encoding='utf-8') as output:
+        result=subprocess.run(command,cwd=folder,env=env,stdout=output,stderr=subprocess.STDOUT)
+    print(log.read_text(encoding='utf-8',errors='replace'),flush=True)
+    result.check_returncode()
+# Preserve the original inventory gate before replacing runtime companion inputs.
+inventory={}
+for key in ('printerRelease','quick','chain'):
+    row=original[mc][key]
+    for attempt in range(4):
+        try:
+            with urllib.request.urlopen(urllib.request.Request(row['url'],headers={'User-Agent':'Litematica-production-CI'}),timeout=120) as response:
+                digest=hashlib.sha256(response.read()).hexdigest()
+            assert digest==row['sha256'],(key,row['name'],'published artifact hash mismatch')
+            break
+        except Exception:
+            if attempt==3:raise
+            time.sleep(2*(attempt+1))
+    inventory[key]={'name':row['name'],'sha256':digest}
+(build_logs/'published-inventory.json').write_text(json.dumps(inventory,indent=2),encoding='utf-8')
 companions={}
 for repo,sha in minimum['companions'].items():
     folder=ROOT/'.ci/minimum-source'/repo/mc

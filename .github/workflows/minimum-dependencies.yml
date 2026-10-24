@@ -47,7 +47,9 @@ jobs:
           path: |
             .ci/minimum-results/${{ matrix.minecraft }}/
             .ci/results/${{ matrix.minecraft }}/
+            .ci/minimum-build-logs/${{ matrix.minecraft }}/
             .ci/minimum-source/*/${{ matrix.minecraft }}/build/test-results/
             .ci/minimum-source/*/${{ matrix.minecraft }}/build/libs/*.jar
             versions/${{ matrix.minecraft }}/build/libs/*.jar
           if-no-files-found: error
+          include-hidden-files: true
