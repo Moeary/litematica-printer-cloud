@@ -60,6 +60,7 @@ public final class PrinterSmokeClient implements ClientModInitializer {
     private int ticks;
     private long deadline;
     private CompletableFuture<Void> serverWork;
+    private CompletableFuture<Boolean> blockConfirmation;
     private int heightFilterCase;
     private CompletableFuture<Boolean> heightFilterReady;
     private static final BlockPos FILTER_LOW = new BlockPos(4, 63, 0);
@@ -145,7 +146,8 @@ public final class PrinterSmokeClient implements ClientModInitializer {
                     advance(4);
                 }
                 case 4 -> {
-                    if (!client.level.getBlockState(PLACE).is(Blocks.STONE)) return;
+                    if (!client.level.getBlockState(PLACE).is(Blocks.STONE)
+                            || !serverHasBlock(client, PLACE, Blocks.STONE)) return;
                     disable();
                     serverWork = onServer(client, server -> {
                         check(server.overworld().getBlockState(PLACE).is(Blocks.STONE), "Fill was only predicted locally");
@@ -187,7 +189,8 @@ public final class PrinterSmokeClient implements ClientModInitializer {
                     advance(7);
                 }
                 case 7 -> {
-                    if (!client.level.getBlockState(PLACE).is(Blocks.STONE)) return;
+                    if (!client.level.getBlockState(PLACE).is(Blocks.STONE)
+                            || !serverHasBlock(client, PLACE, Blocks.STONE)) return;
                     disable();
                     serverWork = onServer(client, server -> {
                         check(server.overworld().getBlockState(PLACE).is(Blocks.STONE), "Shulker fill was only predicted locally");
@@ -232,7 +235,8 @@ public final class PrinterSmokeClient implements ClientModInitializer {
                     advance(11);
                 }
                 case 11 -> {
-                    if (!client.level.getBlockState(BREAK).isAir()) return;
+                    if (!client.level.getBlockState(BREAK).isAir()
+                            || !serverHasBlock(client, BREAK, Blocks.AIR)) return;
                     serverWork = onServer(client, server -> check(server.overworld().getBlockState(BREAK).isAir(), "ChainVein break not authoritative"));
                     advance(12);
                 }
@@ -258,7 +262,8 @@ public final class PrinterSmokeClient implements ClientModInitializer {
                     advance(14);
                 }
                 case 14 -> {
-                    if (!client.level.getBlockState(PLACE).is(Blocks.STONE)) return;
+                    if (!client.level.getBlockState(PLACE).is(Blocks.STONE)
+                            || !serverHasBlock(client, PLACE, Blocks.STONE)) return;
                     disable();
                     serverWork = onServer(client, server -> {
                         check(server.overworld().getBlockState(PLACE).is(Blocks.STONE), "Schematic print not authoritative");
@@ -278,7 +283,8 @@ public final class PrinterSmokeClient implements ClientModInitializer {
                     advance(17);
                 }
                 case 17 -> {
-                    if (!client.level.getBlockState(PLACE).is(Blocks.STONE)) return;
+                    if (!client.level.getBlockState(PLACE).is(Blocks.STONE)
+                            || !serverHasBlock(client, PLACE, Blocks.STONE)) return;
                     disable();
                     serverWork = onServer(client, server -> {
                         check(server.overworld().getBlockState(PLACE).is(Blocks.STONE), "Packet schematic print not authoritative");
@@ -307,7 +313,8 @@ public final class PrinterSmokeClient implements ClientModInitializer {
                     advance(20);
                 }
                 case 20 -> {
-                    if (!client.level.getBlockState(PLACE).is(Blocks.SAND)) return;
+                    if (!client.level.getBlockState(PLACE).is(Blocks.SAND)
+                            || !serverHasBlock(client, PLACE, Blocks.SAND)) return;
                     disable();
                     serverWork = onServer(client, server -> {
                         check(server.overworld().getBlockState(PLACE).is(Blocks.SAND), "Fluid removal not authoritative");
@@ -488,6 +495,19 @@ public final class PrinterSmokeClient implements ClientModInitializer {
         ModuleManager.FILL.resetScanState();
         ModuleManager.PRINT.resetScanState();
         ModuleManager.FLUID_REMOVAL.resetScanState();
+    }
+
+    private boolean serverHasBlock(Minecraft client, BlockPos position, Block block) {
+        if (blockConfirmation == null) {
+            MinecraftServer server = client.getSingleplayerServer();
+            blockConfirmation = CompletableFuture.supplyAsync(
+                    () -> server.overworld().getBlockState(position).is(block), server);
+            return false;
+        }
+        if (!blockConfirmation.isDone()) return false;
+        boolean present = blockConfirmation.join();
+        blockConfirmation = null;
+        return present;
     }
 
     private void advance(int next) {

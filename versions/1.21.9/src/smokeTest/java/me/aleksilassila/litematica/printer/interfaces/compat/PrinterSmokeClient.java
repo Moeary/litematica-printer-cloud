@@ -235,7 +235,8 @@ public final class PrinterSmokeClient implements ClientModInitializer {
                     advance(11);
                 }
                 case 11 -> {
-                    if (!client.level.getBlockState(BREAK).isAir()) return;
+                    if (!client.level.getBlockState(BREAK).isAir()
+                            || !serverHasBlock(client, BREAK, Blocks.AIR)) return;
                     serverWork = onServer(client, server -> check(server.overworld().getBlockState(BREAK).isAir(), "ChainVein break not authoritative"));
                     advance(12);
                 }
