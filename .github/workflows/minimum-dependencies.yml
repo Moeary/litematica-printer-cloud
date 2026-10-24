@@ -6,8 +6,9 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: minimum-dependencies-${{ github.ref }}
-  cancel-in-progress: true
+  # Preserve diagnostic and readiness-control evidence from separate commits.
+  group: minimum-dependencies-${{ github.ref }}-${{ github.sha }}
+  cancel-in-progress: false
 env:
   LIBGL_ALWAYS_SOFTWARE: '1'
   GALLIUM_DRIVER: llvmpipe
