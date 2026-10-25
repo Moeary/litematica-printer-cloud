@@ -19,6 +19,7 @@ public final class QuickShulkerCompat {
     public static void onPlayJoin() {
         QuickShulkerDirectBridge.reset();
         QuickShulkerLegacySession.reset();
+        CloudCatalogSession.reset();
         selectedPath = QuickShulkerDirectBridge.isAvailable()
                 ? Path.DIRECT
                 : Path.LEGACY;
@@ -28,6 +29,7 @@ public final class QuickShulkerCompat {
         selectedPath = Path.UNRESOLVED;
         QuickShulkerDirectBridge.reset();
         QuickShulkerLegacySession.reset();
+        CloudCatalogSession.reset();
     }
 
     public static boolean requestShulkerItem(LocalPlayer player, Item[] items) {
@@ -40,7 +42,10 @@ public final class QuickShulkerCompat {
         ShulkerSource source = (ShulkerSource) Configs.Print.SHULKER_SOURCE.getOptionListValue();
         return switch (source) {
             case TAKE_IT_OUT -> TakeItOutCompat.tryExtract(player, items);
-            case PLUGIN -> QuickShulkerLegacySession.request(player, items, source);
+            case PLUGIN -> {
+                if (!CloudCatalogSession.prepare(player, items)) yield CloudCatalogSession.waiting(player);
+                yield QuickShulkerLegacySession.request(player, items, source);
+            }
             case MOD -> switch (selectedPath()) {
                 case DIRECT -> QuickShulkerDirectBridge.request(player, items);
                 case LEGACY -> QuickShulkerLegacySession.request(player, items, source);

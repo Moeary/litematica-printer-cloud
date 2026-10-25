@@ -49,10 +49,25 @@ tasks.withType(JavaCompile).configureEach {
 
 // Separate executable integration harness; never included in the release JAR.
 sourceSets {
+    cloudTest {
+        compileClasspath += sourceSets.main.compileClasspath + sourceSets.main.output
+        runtimeClasspath += sourceSets.main.runtimeClasspath + sourceSets.main.output
+    }
     smokeTest {
         compileClasspath += sourceSets.main.compileClasspath + sourceSets.main.output
         runtimeClasspath += sourceSets.main.runtimeClasspath + sourceSets.main.output
     }
+}
+tasks.register('cloudTestJar', Jar) {
+    archiveClassifier = 'cloud-test-dev'
+    from sourceSets.cloudTest.output
+}
+tasks.register('remapCloudTestJar', net.fabricmc.loom.task.RemapJarTask) {
+    dependsOn tasks.named('cloudTestJar')
+    inputFile = tasks.named('cloudTestJar').flatMap { it.archiveFile }
+    archiveClassifier = 'cloud-test'
+    addNestedDependencies = false
+    classpath.from(sourceSets.cloudTest.compileClasspath)
 }
 tasks.register('smokeJar', Jar) {
     archiveClassifier = 'smoke-test-dev'

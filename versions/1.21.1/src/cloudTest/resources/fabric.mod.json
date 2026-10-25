@@ -1,0 +1,1 @@
+{"schemaVersion":1,"id":"cloud-printer-test","version":"1.0.0","name":"Cloud printer isolated restock test","environment":"client","entrypoints":{"client":["me.aleksilassila.litematica.printer.interfaces.compat.CloudRestockProbe"]},"depends":{"litematica-printer":"*","fabric-api":"*"}}

@@ -1,5 +1,7 @@
 # Litematica Printer 4th
 
+> **CloudStorage compatibility edition — Minecraft 1.21.1 only.** This repository is Moeary's local adaptation of water2004 v1.1.5, version `1.1.5-cloud.1+1.21.1`. See [cloud edition changes and build instructions](CLOUD-STORAGE.md) and [中文更新说明](CLOUD-STORAGE_zh.md). On-demand cloud restocking requires [CloudStorage 0.2.0](https://github.com/Moeary/Cloud-Storage) on the server. The upstream documentation below is retained for attribution and general printer features; its upstream download links do not contain these cloud-specific changes.
+
 [简体中文](README_zh.md)
 
 [![GitHub release](https://img.shields.io/github/v/release/water2004/litematica-printer?include_prereleases)](https://github.com/water2004/litematica-printer/releases)

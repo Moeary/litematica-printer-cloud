@@ -48,6 +48,17 @@ final class QuickShulkerLegacySession {
         Inventory inventory = player.getInventory();
         discardReturnsWithoutMaterial(inventory);
 
+        int cloudSlot = source == ShulkerSource.PLUGIN ? CloudCatalogSession.find(player) : -1;
+        if (cloudSlot >= 0 && QuickShulkerInventory.isInventoryFull(inventory)) {
+            // A virtual catalogue changes contents by design. Its UUID-bound token is the identity.
+            // Do not depend on a stale contents snapshot or a previous printer extraction.
+            int candidate = CloudCatalogSession.returnCandidate(inventory, items);
+            if (candidate < 0) return false;
+            activeReturnRequest = new ReturnRequest(inventory.getItem(candidate).getItem(), null, candidate);
+            activeShulker = null;
+            return open(inventory, cloudSlot, source);
+        }
+
         if (QuickShulkerInventory.isInventoryFull(inventory) && !itemsToReturn.isEmpty()) {
             ReturnRequest request = itemsToReturn.getFirst();
             int boxSlot = Configs.Print.RETURN_TO_SHULKER_WHEN_FULL.getBooleanValue()
@@ -135,7 +146,7 @@ final class QuickShulkerLegacySession {
         Inventory inventory = player.getInventory();
         if (activeReturnRequest != null) {
             returnItem(player, container, inventory, activeReturnRequest);
-            finish(player);
+            finish(null);
             return;
         }
 
@@ -206,7 +217,13 @@ final class QuickShulkerLegacySession {
         }
 
         int ownSlots = container.slots.size() - QuickShulkerInventory.storageSize(inventory);
-        int sourceSlot = QuickShulkerInventory.findItem(inventory, request.item());
+        int sourceSlot = request.sourceSlot() >= 0 ? request.sourceSlot()
+                : QuickShulkerInventory.findItem(inventory, request.item());
+        if (request.sourceSlot() >= 0 && (!inventory.getItem(sourceSlot).is(request.item())
+                || !ItemStack.isSameItemSameComponents(inventory.getItem(sourceSlot), new ItemStack(request.item())))) {
+            itemsToReturn.removeFirstOccurrence(request);
+            return;
+        }
         if (sourceSlot < 0) {
             itemsToReturn.removeFirstOccurrence(request);
             return;
@@ -304,7 +321,8 @@ final class QuickShulkerLegacySession {
         return null;
     }
 
-    private record ReturnRequest(Item item, TrackedShulker shulker) {
+    private record ReturnRequest(Item item, TrackedShulker shulker, int sourceSlot) {
+        ReturnRequest(Item item, TrackedShulker shulker) { this(item, shulker, -1); }
     }
 
     private static final class TrackedShulker {
