@@ -7,6 +7,13 @@ Local changes dated 2026-10-25 are limited to Minecraft 1.21.1.
 Corresponding source: https://github.com/Moeary/litematica-printer-cloud/tree/cloud/1.21.1
 Server plugin: https://github.com/Moeary/Cloud-Storage
 
+`1.1.5-cloud.2+1.21.1` prioritizes an owned cloud catalogue over physical boxes,
+regardless of inventory slot or candidate order. Missing cloud stock falls back to
+ordinary boxes after the bounded discovery wait. Old/foreign cloud tokens are never
+treated as physical stock. AxShulkers coexistence requires CloudStorage 0.2.3 or later
+with its isolation ready; tested upstream version is 1.24.0. Ordinary opening stays
+with AxShulkers. No placement algorithm changes are included.
+
 `1.1.5-cloud.1+1.21.1` adds a bounded `cloudstorage:demand` Fabric C2S payload.
 Only owned CloudStorage v3 tokens use this optional protocol. In auto mode, request
 the desired materials and wait for the actual server catalogue before opening.

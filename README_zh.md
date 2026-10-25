@@ -1,6 +1,6 @@
 # Litematica Printer 四改版
 
-> **本仓库为 Minecraft 1.21.1 云仓适配自改版**，基于 water2004 四改 v1.1.5，版本 `1.1.5-cloud.1+1.21.1`。更新说明见 [CLOUD-STORAGE_zh.md](CLOUD-STORAGE_zh.md)，按需取料需服务端安装 [CloudStorage 0.2.0](https://github.com/Moeary/Cloud-Storage)。以下保留上游说明与署名；下方上游下载地址不包含本仓库的云仓改动。
+> **本仓库为 Minecraft 1.21.1 云仓适配自改版**，基于 water2004 四改 v1.1.5，版本 `1.1.5-cloud.2+1.21.1`。更新说明见 [CLOUD-STORAGE_zh.md](CLOUD-STORAGE_zh.md)，按需取料需服务端安装 [CloudStorage 0.2.0](https://github.com/Moeary/Cloud-Storage)。以下保留上游说明与署名；下方上游下载地址不包含本仓库的云仓改动。
 
 [English](README.md)
 

@@ -49,7 +49,9 @@ final class QuickShulkerLegacySession {
         discardReturnsWithoutMaterial(inventory);
 
         int cloudSlot = source == ShulkerSource.PLUGIN ? CloudCatalogSession.find(player) : -1;
-        if (cloudSlot >= 0 && QuickShulkerInventory.isInventoryFull(inventory)) {
+        boolean cloudHasItem = cloudSlot >= 0 && QuickShulkerInventory.contents(inventory.getItem(cloudSlot)).stream()
+                .anyMatch(stored -> java.util.Arrays.asList(items).contains(stored.getItem()));
+        if (cloudHasItem && QuickShulkerInventory.isInventoryFull(inventory)) {
             // A virtual catalogue changes contents by design. Its UUID-bound token is the identity.
             // Do not depend on a stale contents snapshot or a previous printer extraction.
             int candidate = CloudCatalogSession.returnCandidate(inventory, items);
@@ -73,8 +75,21 @@ final class QuickShulkerLegacySession {
             return open(inventory, boxSlot, source);
         }
 
-        for (Item item : items) {
-            int boxSlot = QuickShulkerInventory.findShulkerWithItem(inventory, item);
+        // Cloud stock has priority regardless of the shell's inventory position or candidate order.
+        for (int pass = 0; pass < 2; pass++) for (Item item : items) {
+            int boxSlot = -1;
+            if (pass == 0) {
+                if (cloudSlot >= 0 && QuickShulkerInventory.contents(inventory.getItem(cloudSlot)).stream()
+                        .anyMatch(stored -> stored.is(item))) boxSlot = cloudSlot;
+            } else {
+                for (int slot = 0; slot < QuickShulkerInventory.storageSize(inventory); slot++) {
+                    ItemStack box = inventory.getItem(slot);
+                    if (QuickShulkerInventory.isSingleShulker(box) && !CloudCatalogSession.isCatalog(box)
+                            && QuickShulkerInventory.contents(box).stream().anyMatch(stored -> stored.is(item))) {
+                        boxSlot = slot; break;
+                    }
+                }
+            }
             if (boxSlot < 0) continue;
 
             ItemStack box = inventory.getItem(boxSlot);

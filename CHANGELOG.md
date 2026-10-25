@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.5-cloud.2 (1.21.1, 2026-10-25)
+
+- Prefer owned CloudStorage catalogues over ordinary shulkers regardless of inventory slot or candidate order.
+- Fall back to ordinary shulkers after the bounded missing-stock wait; exclude old/foreign cloud catalogues from physical-stock scans.
+- Preserve the v3 demand/click protocol and safe full-inventory return path. AxShulkers coexistence needs CloudStorage 0.2.3 isolation; validated with upstream 1.24.0.
+- Full Fabric/Paper non-OP test: cloud priority 411 ms, physical fallback 1256 ms, full-inventory return/restock 343 ms. No placement algorithm changes.
+
+
 #### 2026-7-7 (1.3-beta.4)
 
 - **轮换模式** — 新增热键切换打印→矿→填充→流体→基岩轮换，不再自动启动全局开关，添加 I18n

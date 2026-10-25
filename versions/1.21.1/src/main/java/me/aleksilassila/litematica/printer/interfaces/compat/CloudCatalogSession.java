@@ -39,6 +39,14 @@ final class CloudCatalogSession {
         return data.getString("cloudstorage:token");
     }
 
+    /** Foreign/old cloud shells must never be treated as ordinary physical stock. */
+    static boolean isCatalog(ItemStack stack) {
+        var custom = stack.get(DataComponents.CUSTOM_DATA);
+        if (custom == null) return false;
+        CompoundTag data = custom.copyTag().getCompound("PublicBukkitValues");
+        return data.contains("cloudstorage:token") || data.contains("cloudstorage:owner");
+    }
+
     static int find(LocalPlayer player) {
         for (int slot = 0; slot < QuickShulkerInventory.storageSize(player.getInventory()); slot++) {
             if (!tokenId(player, player.getInventory().getItem(slot)).isEmpty()) return slot;
@@ -49,7 +57,7 @@ final class CloudCatalogSession {
     /** Wait for the server's actual catalogue update before opening the virtual box. */
     static boolean prepare(LocalPlayer player, Item[] items) {
         int slot = find(player);
-        if (slot < 0) return true;
+        if (slot < 0) { reset(); return true; }
         ItemStack token = player.getInventory().getItem(slot);
         CompoundTag data = token.get(DataComponents.CUSTOM_DATA).copyTag().getCompound("PublicBukkitValues");
         if (data.getInt("cloudstorage:page") >= 0 || !data.getString("cloudstorage:materials").isBlank()) return true;
@@ -60,7 +68,7 @@ final class CloudCatalogSession {
         int elapsed = player.tickCount - sentAt;
         String identity = tokenId(player, token) + ":" + request;
         if (!identity.equals(lastRequest) || (!ready && elapsed >= 20)) {
-            if (!ClientPlayNetworking.canSend(CloudDemandPayload.TYPE)) return false;
+            if (!ClientPlayNetworking.canSend(CloudDemandPayload.TYPE)) { reset(); return false; }
             if (!identity.equals(lastRequest)) firstRequested = player.tickCount;
             ClientPlayNetworking.send(new CloudDemandPayload(request));
             lastRequest = identity;

@@ -43,7 +43,7 @@ public final class QuickShulkerCompat {
         return switch (source) {
             case TAKE_IT_OUT -> TakeItOutCompat.tryExtract(player, items);
             case PLUGIN -> {
-                if (!CloudCatalogSession.prepare(player, items)) yield CloudCatalogSession.waiting(player);
+                if (!CloudCatalogSession.prepare(player, items) && CloudCatalogSession.waiting(player)) yield true;
                 yield QuickShulkerLegacySession.request(player, items, source);
             }
             case MOD -> switch (selectedPath()) {
